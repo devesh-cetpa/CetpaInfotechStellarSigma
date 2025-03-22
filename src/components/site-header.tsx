@@ -9,6 +9,8 @@ import { resetUser } from '@/features/user/userSlice';
 import { environment } from '@/config';
 import { RootState } from '@/app/store';
 import Heading from './ui/heading';
+import { Button } from "./ui/button";
+import { Power } from "lucide-react";
 
 const SiteHeader: React.FC = ({ showtoggle = true }: { showtoggle?: boolean }) => {
   const user = useSelector((state: RootState) => state.user);
@@ -38,23 +40,15 @@ const SiteHeader: React.FC = ({ showtoggle = true }: { showtoggle?: boolean }) =
             <span className="text-sm md:text-md text-gray-600">A Govt. of India (Ministry of Railways) Enterprise</span>
           </Link>
         </div>
-        <Heading type={5} className="text-primary">
-          Grievance Management System
-        </Heading>
 
-        {/* Right Section (User Info + Logout Button) */}
         <div className="flex items-center space-x-6">
           {/* User Name */}
           {showtoggle && (
             <div className="hidden md:block text-gray-800 text-md md:text-lg font-semibold">{user.unique_name}</div>
           )}
-          {/* Logout Button */}
-          {/* <button
-            onClick={handleLogout}
-            className="cursor-pointer flex items-center justify-center rounded-md bg-gray-100 shadow-md p-3 hover:bg-gray-200 transition-all"
-          >
-            <img src={HomeIconLogo} alt="Logout" className="w-6 h-6" />
-          </button> */}
+          <Button variant="outline" size="icon" onClick={() => (window.location.href = environment.powerOffUrl)}>
+            <Power />
+          </Button>
         </div>
       </div>
     </header>
