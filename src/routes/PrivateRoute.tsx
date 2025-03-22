@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { Navigate, Outlet } from 'react-router';
-import AppLayout from '@/components/app-layout';
+import AppLayout from '@/components/layout/app-layout';
 import { getSessionItem } from '@/lib/helperFunction';
 const PrivateRoute: React.FC = () => {
   // const isAuthenticated = getSessionItem('token');
