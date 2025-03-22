@@ -11,6 +11,8 @@ import {
   Hotel,
   UserRoundCog,
   UserRoundPen,
+  ChevronsLeft,
+  ChevronsRight,
 } from 'lucide-react';
 import { NavMain } from '@/components/nav-main';
 import {
@@ -42,7 +44,7 @@ import useUserRoles from '@/hooks/useUserRoles';
 export function AppSidebar(props: React.ComponentProps<typeof Sidebar>) {
   const { isHOD, isAddressal, isCommittee } = useUserRoles();
   const navigate = useNavigate();
-  const { state } = useSidebar();
+  const { state, toggleSidebar } = useSidebar();
   const { isNodalOfficer, isSuperAdmin, isAdmin, isUnitCGM } = useUserRoles();
   const hasAccess = isNodalOfficer || isSuperAdmin || isAdmin || isUnitCGM;
   const canViewRedressalGrievances =
@@ -54,16 +56,7 @@ export function AppSidebar(props: React.ComponentProps<typeof Sidebar>) {
       url: '/dashboard',
       icon: LayoutGrid,
     },
-    {
-      title: 'My Grievances',
-      url: '/grievances',
-      icon: BadgeAlert,
-    },
-    canViewRedressalGrievances && {
-      title: 'Redressal Grievances',
-      url: '/redressal-grievances',
-      icon: UserRoundPen,
-    },
+
   ].filter(Boolean);
 
   const dispatch = useDispatch();
@@ -109,14 +102,12 @@ export function AppSidebar(props: React.ComponentProps<typeof Sidebar>) {
     dispatch(resetUser());
     window.location.href = environment.logoutUrl;
   };
+  console.log("state", state)
   return (
     <Sidebar collapsible="icon" {...props} className="">
-      <SidebarHeader className="flex flex-row justify-between items-center py-4 px-4">
-        <img
-          src={logo}
-          className={`transition-all object-contain ${state === 'collapsed' ? 'w-14 h-10' : 'w-full h-12'}`}
-        />
-      </SidebarHeader>
+      <div className="flex justify-end md:pt-[80px] ">
+        {state === "collapsed" ? <ChevronsRight onClick={toggleSidebar} className="w-8 h-8 cursor-pointer" /> : <ChevronsLeft onClick={toggleSidebar} className="w-8 h-8 cursor-pointer" />}
+      </div>
       <SidebarContent className="flex justify-between">
         <NavMain items={navMainItems} />
       </SidebarContent>

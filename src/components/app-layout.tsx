@@ -5,15 +5,19 @@ import SiteHeader from './site-header';
 
 const AppLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   return (
-    <SidebarProvider>
-      <div className="flex flex-1 overflow-hidden">
-        <AppSidebar className="w-64 bg-gray-800 text-white flex-shrink-0 " />
-        <div className="flex-1  bg-gray-100 overflow-auto">
-          <SiteHeader />
-          <div className="flex-1 w-full"> {children}</div>
+
+    <SidebarProvider className="flex flex-col w-full">
+      <SiteHeader />
+      <div className="w-full bg-gray-100">
+        <div className="flex flex-row">
+          <div className="w-auto">
+            <AppSidebar className="w-64 bg-gray-800 text-white flex-shrink-0" />
+          </div>
+          <div className="w-full">{children}</div>
         </div>
       </div>
     </SidebarProvider>
+
   );
 };
 

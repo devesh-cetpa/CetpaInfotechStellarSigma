@@ -1,53 +1,45 @@
-import React from 'react';
-import { Link } from 'react-router';
-import { HomeIconLogo, logo } from '@/assets/image/images';
-import { SidebarTrigger } from './ui/sidebar';
-import { Separator } from './ui/separator';
-import { useDispatch, useSelector } from 'react-redux';
-import { removeSessionItem } from '@/lib/helperFunction';
-import { resetUser } from '@/features/user/userSlice';
-import { environment } from '@/config';
-import { RootState } from '@/app/store';
-import Heading from './ui/heading';
+import React from "react";
+import { Link } from "react-router";
+import { logo } from "@/assets/image/images";
+import { useDispatch, useSelector } from "react-redux";
+import { removeSessionItem } from "@/lib/helperFunction";
+import { resetUser } from "@/features/user/userSlice";
+import { environment } from "@/config";
+import { RootState } from "@/app/store";
 import { Button } from "./ui/button";
-import { Power } from "lucide-react";
+import { AlignJustify, Power } from "lucide-react";
+import { SidebarTrigger, useSidebar } from "./ui/sidebar";
 
-const SiteHeader: React.FC = ({ showtoggle = true }: { showtoggle?: boolean }) => {
+const SiteHeader: React.FC<{ showtoggle?: boolean }> = ({ showtoggle = false }) => {
   const user = useSelector((state: RootState) => state.user);
-  const dispatch = useDispatch();
-
-  const handleLogout = () => {
-    removeSessionItem('token');
-    dispatch(resetUser());
-    window.location.href = environment.logoutUrl;
-  };
+  const { toggleSidebar } = useSidebar()
 
   return (
-    <header className="bg-white shadow-md sticky top-0 w-full z-50 border-b-4 border-red-600 h-[80px]">
-      <div className="flex items-center justify-between pr-8 py-4">
-        <div className="flex items-center space-x-6">
-          {showtoggle && (
-            <>
-              <SidebarTrigger className="text-primary w-12 h-12  rounded-md transition-all " />
-              <Separator orientation="vertical" className="h-8 bg-gray-300" />
-            </>
-          )}
+    <header className="bg-white shadow-md sticky top-0 w-full z-50 border-b-4 border-red-600 h-[80px] px-6">
 
+      <div className="flex items-center justify-between h-full p-2">
+        <div className="flex items-center space-x-4 ">
+          <div className="md:hidden">
+            <AlignJustify className="w-8 h-8 cursor-pointer rounded-md transition-all " onClick={toggleSidebar} />          </div>
+          <img src={logo} alt="Company Logo" className="object-contain h-12 w-auto" />
           <Link to="#" className="hidden sm:flex flex-col text-primary">
             <span className="text-md md:text-lg font-semibold">
               Dedicated Freight Corridor Corporation of India Limited
             </span>
-            <span className="text-sm md:text-md text-gray-600">A Govt. of India (Ministry of Railways) Enterprise</span>
+            <span className="text-sm md:text-md text-gray-600">
+              A Govt. of India (Ministry of Railways) Enterprise
+            </span>
           </Link>
         </div>
 
-        <div className="flex items-center space-x-6">
-          {/* User Name */}
+        <div className="flex items-center space-x-4">
           {showtoggle && (
-            <div className="hidden md:block text-gray-800 text-md md:text-lg font-semibold">{user.unique_name}</div>
+            <div className="hidden md:block text-gray-800 text-md md:text-lg font-semibold">
+              {user.unique_name}
+            </div>
           )}
           <Button variant="outline" size="icon" onClick={() => (window.location.href = environment.powerOffUrl)}>
-            <Power />
+            <Power className="w-5 h-5" />
           </Button>
         </div>
       </div>
