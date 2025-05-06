@@ -6,8 +6,7 @@ import HomePage from '@/pages/home/Home';
 import Dashboard from '@/pages/employee/Dashboard';
 import AdminPrivateRoute from './AdminPrivateRoute';
 import AdminDashboard from '@/pages/admin/AdminDashboard';
-import Search from "@/pages/search/Search";
-
+import Search from '@/pages/search/Search';
 
 const AppRoutes = () => {
   return (
@@ -16,7 +15,6 @@ const AppRoutes = () => {
       <Route path="/" element={<HomePage />} />
       <Route element={<PrivateRoute />}>
         <Route path="/dashboard" element={<Dashboard />} />
-        <Route path="/search" element={<Search />} />
       </Route>
       <Route element={<AdminPrivateRoute />}>
         <Route path="/admin-dashboard" element={<AdminDashboard />} />

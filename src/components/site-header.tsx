@@ -38,9 +38,6 @@ const SiteHeader: React.FC<{ showtoggle?: boolean }> = ({ showtoggle = false }) 
           </Button>
         </div>
       </div>
-      <div className="flex justify-center text-primary font-bold text-2xl relative">
-        <div className="p-1 absolute">Visitor Management System</div>
-      </div>
     </header>
   );
 };
