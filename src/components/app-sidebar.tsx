@@ -1,5 +1,15 @@
 import * as React from 'react';
-import { LayoutGrid, LogOut, Hotel, ChevronsLeft, ChevronsRight } from 'lucide-react';
+import {
+  LayoutGrid,
+  LogOut,
+  Hotel,
+  ChevronsLeft,
+  ChevronsRight,
+  Home,
+  Users,
+  ChartNoAxesGantt,
+  MonitorCog,
+} from 'lucide-react';
 import { NavMain } from '@/components/nav-main';
 import {
   Sidebar,
@@ -24,9 +34,24 @@ export function AppSidebar(props: React.ComponentProps<typeof Sidebar>) {
   const hasAccess = isNodalOfficer || isSuperAdmin || isAdmin || isUnitCGM;
   const navMainItems = [
     {
-      title: 'Dashboard',
-      url: '/dashboard',
-      icon: LayoutGrid,
+      title: 'Home',
+      url: '/home',
+      icon: Home,
+    },
+    {
+      title: 'Our Leadership',
+      url: '/our-leadership',
+      icon: Users,
+    },
+    {
+      title: 'Organization Structure',
+      url: '/organization-structure',
+      icon: ChartNoAxesGantt,
+    },
+    {
+      title: 'Applications ',
+      url: '/applications',
+      icon: MonitorCog,
     },
   ].filter(Boolean);
 

@@ -1,23 +1,23 @@
 import { Routes, Route } from 'react-router';
 import PrivateRoute from './PrivateRoute';
-import Unauthorized from '@/pages/unauthorized/Unauthorized';
 import NotFound from '@/pages/notFound/NotFound';
-import HomePage from '@/pages/home/Home';
 import Dashboard from '@/pages/employee/Dashboard';
-import AdminPrivateRoute from './AdminPrivateRoute';
-import AdminDashboard from '@/pages/admin/AdminDashboard';
-import Search from '@/pages/search/Search';
+import Login from '@/pages/auth/Login';
+import Home from '@/pages/home/Home';
+import Application from '@/pages/applications/Applications';
+import OrganizationStructure from '@/pages/organizationStructure/OrganizationStructure';
+import OurLeadership from '@/pages/ourLeadership/OurLeadership';
 
 const AppRoutes = () => {
   return (
     <Routes>
-      <Route path="/unauthorized" element={<Unauthorized />} />
-      <Route path="/" element={<HomePage />} />
+      <Route path="/" element={<Login />} />
       <Route element={<PrivateRoute />}>
+        <Route path="/home" element={<Home />} />
         <Route path="/dashboard" element={<Dashboard />} />
-      </Route>
-      <Route element={<AdminPrivateRoute />}>
-        <Route path="/admin-dashboard" element={<AdminDashboard />} />
+        <Route path="/our-leadership" element={<OurLeadership />} />
+        <Route path="/organization-structure" element={<OrganizationStructure />} />
+        <Route path="/applications" element={<Application />} />
       </Route>
       <Route path="*" element={<NotFound />} />
     </Routes>

@@ -1,6 +1,3 @@
-import { log } from 'console';
-import { logout } from './features/auth/authSlice';
-
 const DEV_CONFIG = {
   apiUrl: 'https://tms-services.cetpainfotech.com/api',
   orgHierarchy: 'https://uat.dfccilorganization.services.cetpainfotech.com/api',
