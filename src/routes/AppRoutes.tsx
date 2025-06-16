@@ -12,6 +12,9 @@ import Events from '@/pages/landingPage/Events';
 import DetailEvent from '@/pages/landingPage/DetailEvent';
 import CreateEvents from '@/pages/admin/CreateEvents';
 import ResetPassword from '@/pages/admin/ResetPassword';
+import MonthlyReport from '@/pages/monthly/user/MonthlyReport';
+import PublicRoute from './PublicRoutes';
+import ResettPassword from '@/pages/monthly/user/ResettPassword';
 
 const AppRoutes = () => {
   return (
@@ -29,7 +32,16 @@ const AppRoutes = () => {
       <Route element={<PrivateRoute />}>
         <Route path="/monthly-report" element={<UserMonthlyReport />} />
              <Route path="/event-manage" element={<CreateEvents />} />
+              
              <Route path="/reset" element={<ResetPassword />} />
+        {/* <Route path="/dashboard" element={<Dashboard />} /> */}
+      </Route>
+
+      
+      <Route element={<PublicRoute/>}>
+       
+                <Route path="/report-monthly" element={<MonthlyReport />} />
+             <Route path="/reset-password" element={<ResettPassword />} />
         {/* <Route path="/dashboard" element={<Dashboard />} /> */}
       </Route>
       <Route path="*" element={<NotFound />} />

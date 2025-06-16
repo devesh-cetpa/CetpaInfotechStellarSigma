@@ -51,7 +51,19 @@ export const fetchEvents = createAsyncThunk<Event[]>(
 const eventSlice = createSlice({
   name: 'event',
   initialState,
-  reducers: {},
+  reducers: {
+    // Add reducer for updating an event
+    updateEvent: (state, action: PayloadAction<Event>) => {
+      const index = state.events.findIndex(event => event.id === action.payload.id);
+      if (index !== -1) {
+        state.events[index] = action.payload;
+      }
+    },
+    // Add reducer for deleting an event
+    deleteEvent: (state, action: PayloadAction<number>) => {
+      state.events = state.events.filter(event => event.id !== action.payload);
+    }
+  },
   extraReducers: (builder) => {
     builder
       .addCase(fetchEvents.pending, (state) => {
@@ -68,5 +80,8 @@ const eventSlice = createSlice({
       });
   },
 });
+
+// Export the action creators
+export const { updateEvent, deleteEvent } = eventSlice.actions;
 
 export default eventSlice.reducer;

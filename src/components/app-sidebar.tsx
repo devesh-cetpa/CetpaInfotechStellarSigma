@@ -26,7 +26,7 @@ import {
 import { Separator } from '@radix-ui/react-separator';
 import { environment } from '@/config';
 import useUserRoles from '@/hooks/useUserRoles';
-import { removeSessionItem } from '@/lib/helperFunction';
+
 
 export function AppSidebar(props: React.ComponentProps<typeof Sidebar>) {
   const { state, toggleSidebar } = useSidebar();
@@ -35,19 +35,14 @@ export function AppSidebar(props: React.ComponentProps<typeof Sidebar>) {
   // 🔐 Admin-specific routes
   const userRoutes = [
     {
-      title: 'Manage Users',
-      url: '/admin/users',
+      title: 'Monthly Report',
+      url: 'report-monthly',
       icon: Users,
-    },
-    {
-      title: 'System Settings',
-      url: '/admin/settings',
-      icon: MonitorCog,
-    },
-    {
-      title: 'Notice',
-      url: '/notice',
-      icon: Book,
+    }
+ ,  {
+      title: 'Reset Password',
+      url: '/reset-password',
+      icon: ParenthesesIcon,
     },
   ];
 
@@ -68,6 +63,7 @@ export function AppSidebar(props: React.ComponentProps<typeof Sidebar>) {
       url: '/reset',
       icon: ParenthesesIcon,
     },
+  
   ];
 
   // 🔄 Merge routes based on roles
