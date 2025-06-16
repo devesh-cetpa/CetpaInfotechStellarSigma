@@ -13,24 +13,23 @@ import { jwtDecode } from 'jwt-decode';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 
-
-
 const Login = () => {
   const [loginMode, setLoginMode] = useState('otp');
 
   // OTP mode states
   const [apartmentNumber, setApartmentNumber] = useState('');
-  const [email, setEmail] = useState('');
+  const [otpModeEmail, setOtpModeEmail] = useState('');
   const [otp, setOtp] = useState('');
   const [apartmentFound, setApartmentFound] = useState(false);
+
+  // Password mode states
+  const [passwordModeEmail, setPasswordModeEmail] = useState('');
+  const [password, setPassword] = useState('');
 
   const [isLoading, setIsLoading] = useState(false);
   const [otpSent, setOtpSent] = useState(false);
   const [otpVerified, setOtpVerified] = useState(false);
-  // const [flatNumbers] = useState(mockFlats);
 
-  const [passwordEmail, setPasswordEmail] = useState('');
-  const [password, setPassword] = useState('');
   const flatNumbers = useAppSelector((state) => state.appartment.apartments) || [];
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
@@ -43,12 +42,15 @@ const Login = () => {
   const OTP_LENGTH = 6;
   const OTP_PATTERN = /^\d{6}$/;
 
+  // Helper functions
   const formatOTP = (value) => value.replace(/\D/g, '').slice(0, OTP_LENGTH);
   const validateOTP = (value) => OTP_PATTERN.test(value);
   const validateEmail = (email) => /^\S+@\S+\.\S+$/.test(email);
+
   useEffect(() => {
     dispatch(fetchAllApartments());
   }, [dispatch]);
+
   const handleApartmentCheck = async (): Promise<void> => {
     if (!apartmentNumber) {
       toast.error('Please select an apartment number');
@@ -61,12 +63,10 @@ const Login = () => {
       const response = await axiosInstance.post(
         `${environment.apiUrl}api/Login/GetEmailByFlatNo?flatNo=${apartmentNumber}`
       );
-      console.log('API response:', response.data);
-      // Check if response has data array with at least one email
+      
       if (response.data?.data && Array.isArray(response.data.data) && response.data.data.length > 0) {
         const foundEmail = response.data.data[0];
-        setEmail(foundEmail);
-        console.log('Email found for apartment:', foundEmail);
+        setOtpModeEmail(foundEmail);
         setApartmentFound(true);
         toast.success('Apartment found! OTP can be sent to registered email');
       } else {
@@ -76,17 +76,19 @@ const Login = () => {
       console.error('Error checking apartment:', error);
       toast.error(error.message || 'Failed to find apartment. Please try again.');
       setApartmentFound(false);
-      setEmail('');
+      setOtpModeEmail('');
+    } finally {
+      setLoading((prev) => ({ ...prev, apartment: false }));
     }
   };
 
   const handleSendOTP = async (): Promise<void> => {
-    if (!email) {
+    if (!otpModeEmail) {
       toast.error('No email address found');
       return;
     }
 
-    if (!validateEmail(email)) {
+    if (!validateEmail(otpModeEmail)) {
       toast.error('Invalid email address format');
       return;
     }
@@ -97,61 +99,42 @@ const Login = () => {
       const response = await axiosInstance.post(`${environment.apiUrl}api/Login/request-password-reset`, {
         FlatNumber: apartmentNumber,
       });
-      console.log(response.data, 'response in send otp');
 
       if (response.data) {
         setOtpSent(true);
         setOtpVerified(false);
-        setOtp(''); // Clear any existing OTP
-        toast.success(`OTP sent to ${email}`);
+        setOtp('');
+        toast.success(`OTP sent to ${otpModeEmail}`);
       } else {
         toast.error('Failed to send OTP');
       }
     } catch (error: any) {
       console.error('Error sending OTP:', error);
-
-      if (error.response?.status === 400) {
-        const validationError = error.response.data;
-        if (validationError.errors) {
-          const firstError = Object.values(validationError.errors)[0]?.[0];
-          toast.error(firstError || 'Validation error occurred');
-        } else {
-          toast.error('Invalid request format');
-        }
-      } else if (error.response?.data?.message) {
-        toast.error(error.response.data.message);
-      } else {
-        toast.error('Failed to send OTP. Please try again.');
-      }
+      toast.error(error.response?.data?.message || 'Failed to send OTP. Please try again.');
     } finally {
       setLoading((prev) => ({ ...prev, otp: false }));
     }
   };
 
   const handleVerifyOTP = async (): Promise<void> => {
-    // Validate OTP format using standardized function
     if (!validateOTP(otp)) {
       toast.error(`Please enter a valid ${OTP_LENGTH}-digit OTP (numbers only)`);
       return;
     }
 
-    // Validate email format using standardized function
-    if (!email || !validateEmail(email)) {
+    if (!otpModeEmail || !validateEmail(otpModeEmail)) {
       toast.error('Invalid or missing email address');
       return;
     }
 
-    // Start loading
     setLoading((prev) => ({ ...prev, verify: true }));
 
     try {
-      // Send OTP verification request
       const response = await axiosInstance.post(`${environment.apiUrl}api/Login/verify-otp`, {
-        emailId: email,
+        emailId: otpModeEmail,
         otp,
       });
 
-      // Fixed: Check if response has data and token
       if (response.data && response.data.data && response.data.data.token) {
         const token = response.data.data.token;
         const userData = jwtDecode(token);
@@ -159,7 +142,6 @@ const Login = () => {
         sessionStorage.setItem('token', token);
         toast.success('Login Successfully');
 
-        // Navigate based on role
         if (String(userData.role).toLowerCase() === 'admin') {
           navigate('/monthly-report');
         } else if (String(userData.role).toLowerCase() === 'user') {
@@ -174,28 +156,53 @@ const Login = () => {
     } catch (error: any) {
       console.error('Error verifying OTP:', error);
       setOtpVerified(false);
-
-      // Handle validation error from backend
-      if (error.response?.status === 400) {
-        const validationError = error.response.data;
-        if (validationError?.errors) {
-          const firstError = Object.values(validationError.errors)[0]?.[0];
-          toast.error(firstError || 'Validation error occurred');
-        } else {
-          toast.error('Invalid OTP...');
-        }
-      }
-      // General server error message
-      else if (error.response?.data?.message) {
-        toast.error(error.response.data.message);
-      }
-      // Fallback
-      else {
-        toast.error('OTP verification failed. Please try again.');
-      }
+      toast.error(error.response?.data?.message || 'OTP verification failed. Please try again.');
     } finally {
-      // Stop loading
       setLoading((prev) => ({ ...prev, verify: false }));
+    }
+  };
+
+  const handlePasswordLogin = async () => {
+    if (!validateEmail(passwordModeEmail) || !password) {
+      toast.error('Please enter valid email and password.');
+      return;
+    }
+    
+    setIsLoading(true);
+    try {
+      const response = await axiosInstance.post(
+        `${environment.apiUrl}api/login`,
+        {
+          emailId: passwordModeEmail, // Using the correct email state
+          password,
+        }
+      );
+
+      if (response.data.statusCode !== 200 || response.data.error) {
+        throw new Error(response.data.message || "Login failed");
+      }
+      
+      const token = response.data.data.token;
+      const userData = jwtDecode(token);
+      sessionStorage.setItem("userData", JSON.stringify(userData));
+      sessionStorage.setItem("token", token);
+      toast.success("Login Successfully");
+
+      if (String(userData.role).toLowerCase() === "admin") {
+        navigate("/monthly-report");
+      } else if (String(userData.role).toLowerCase() === "user") {
+        navigate("/report-monthly");
+      } else {
+        navigate("/login");
+      }
+    } catch (error: any) {
+      console.log(error, "error in login");
+      toast.error(
+        error?.response?.data?.message ||
+          "Login failed. Please check your credentials."
+      );
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -205,73 +212,12 @@ const Login = () => {
   };
 
   const handleOTPKeyPress = (e: React.KeyboardEvent<HTMLInputElement>): void => {
-    // Allow only digits, backspace, delete, and arrow keys
     if (!/[\d]/.test(e.key) && !['Backspace', 'Delete', 'ArrowLeft', 'ArrowRight', 'Tab', 'Enter'].includes(e.key)) {
       e.preventDefault();
     }
 
-    // Handle Enter key for verification
     if (e.key === 'Enter' && !otpVerified && validateOTP(otp)) {
       handleVerifyOTP();
-    }
-  };
-
-
-  // const resetForm = (): void => {
-  //   setApartmentNumber("");
-  //   setEmail("");
-  //   setOtp("");
-  //   setApartmentFound(false);
-  //   setOtpSent(false);
-  //   setOtpVerified(false);
-  //   setLoading({
-  //     apartment: false,
-  //     otp: false,
-  //     verify: false,
-  //     fetchingFlats: false,
-  //   });
-  //   toast("Form reset", { icon: "🔄" });
-  // };
-  const handlePasswordLogin = async() => {
-    if (!validateEmail(passwordEmail) || !password) {
-      alert('Please enter valid email and password.');
-      return;
-    }
-      setIsLoading(true);
-    try {
-      const response = await axiosInstance.post(
-        `${environment.apiUrl}api/login`,
-        {
-          emailId:email,
-          password,
-        }
-      );
-  
-      if (response.data.statusCode !== 200 || response.data.error) {
-        throw new Error(response.data.message || "Login failed");
-      }
-      const token = response.data.data.token;
-      const userData = jwtDecode(token);
-      sessionStorage.setItem("userData", JSON.stringify(userData));
-      sessionStorage.setItem("token", token);
-      toast.success("Login Successfully");
-
-      // Navigate based on role
-      if (String(userData.role).toLowerCase() === "admin") {
-        navigate("/monthly-report");
-      } else if (String(userData.role).toLowerCase() === "user") {
-        navigate("/report-monthly");
-      } else {
-        navigate("/login");
-      }
-    } catch (error) {
-      console.log(error, "error in login");
-      toast.error(
-        error?.response?.data?.message ||
-          "Login failed. Please check your credentials."
-      );
-    } finally {
-      setIsLoading(false);
     }
   };
 
@@ -286,13 +232,13 @@ const Login = () => {
 
   const resetForm = () => {
     setApartmentNumber('');
-    setEmail('');
+    setOtpModeEmail('');
+    setPasswordModeEmail('');
     setOtp('');
+    setPassword('');
     setApartmentFound(false);
     setOtpSent(false);
     setOtpVerified(false);
-    setPassword('');
-    setPasswordEmail('');
     setLoading({ apartment: false, otp: false, verify: false });
   };
 
@@ -329,7 +275,6 @@ const Login = () => {
                 {loginMode === 'otp' ? 'Secure Access Portal - OTP Login' : 'Secure Access Portal - Password Login'}
               </div>
 
-              {/* Conditional Rendering */}
               {loginMode === 'otp' ? (
                 <>
                   {/* Apartment selection */}
@@ -371,7 +316,7 @@ const Login = () => {
                       <div className="flex gap-2">
                         <Input
                           type="email"
-                          value={email}
+                          value={otpModeEmail}
                           readOnly
                           className="flex-1 px-3 py-2 text-sm border border-gray-300 rounded-md bg-gray-50"
                         />
@@ -435,14 +380,18 @@ const Login = () => {
                     <Input
                       type="email"
                       placeholder="Enter email"
-                      value={passwordEmail}
-                      onChange={(e) => setPasswordEmail(e.target.value)}
+                      value={passwordModeEmail}
+                      onChange={(e) => setPasswordModeEmail(e.target.value)}
                       className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md"
                     />
+                    {passwordModeEmail && !validateEmail(passwordModeEmail) && (
+                      <p className="text-xs text-red-500">Please enter a valid email address</p>
+                    )}
+                    
                     <Label className="text-sm font-medium text-gray-700">
                       <LockKeyhole size={14} className="inline-block mr-1" />
                       Password
-                      </Label>
+                    </Label>
                     <Input
                       type="password"
                       placeholder="Enter password"
@@ -470,11 +419,12 @@ const Login = () => {
                     </Button>
                   )
                 ) : (
-                  <Button onClick={handlePasswordLogin} className="w-full h-12 text-white font-semibold shadow-md">
-                    <span className="flex items-center justify-center gap-2">
-                      <span>Login to System</span>
-                      <ChevronRight className="w-4 h-4" />
-                    </span>
+                  <Button 
+                    onClick={handlePasswordLogin} 
+                    className="w-full h-12 text-white font-semibold shadow-md"
+                    disabled={isLoading}
+                  >
+                    {isLoading ? 'Logging in...' : 'Login to System'}
                   </Button>
                 )}
 
@@ -510,7 +460,6 @@ const Login = () => {
                   </div>
                 </div>
               </div>
-             
             </CardFooter>
           </Card>
         </div>
