@@ -12,6 +12,7 @@ import { SidebarTrigger, useSidebar } from './ui/sidebar';
 
 const SiteHeader: React.FC<{ showtoggle?: boolean }> = ({ showtoggle = false }) => {
   const user = useSelector((state: RootState) => state.user);
+  console.log(user,"user");
   const { toggleSidebar } = useSidebar();
 
   return (
@@ -24,9 +25,9 @@ const SiteHeader: React.FC<{ showtoggle?: boolean }> = ({ showtoggle = false }) 
           <img src={logo} alt="Company Logo" className="object-contain h-12 w-auto" />
           <Link to="#" className="hidden sm:flex flex-col text-primary">
             <span className="text-md md:text-lg font-semibold">
-              Dedicated Freight Corridor Corporation of India Limited
+           Stellar Sigma Villas
             </span>
-            <span className="text-sm md:text-md text-gray-600">A Govt. of India (Ministry of Railways) Enterprise</span>
+            <span className="text-sm md:text-md text-gray-600">Stellar Appartments and Villas</span>
           </Link>
         </div>
         <div className="flex items-center space-x-4">

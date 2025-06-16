@@ -1,6 +1,4 @@
-import { RootState } from '@/app/store';
 import { format, parse } from 'date-fns';
-import { useSelector } from 'react-redux';
 
 export const setSessionItem = (key: string, value: any) => {
   const valueToStore = typeof value === 'object' ? JSON.stringify(value) : value;

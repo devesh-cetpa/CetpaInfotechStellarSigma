@@ -1,20 +1,23 @@
 import { configureStore } from '@reduxjs/toolkit';
 import { persistStore, persistReducer } from 'redux-persist';
 import sessionStorage from 'redux-persist/lib/storage/session';
-import localStorage from 'redux-persist/lib/storage';
 import { combineReducers } from 'redux';
-import employeeReducer from '../features/employee/employeeSlice';
-import userReducer from '../features/user/userSlice';
 
+import userReducer from '../features/user/userSlice';
+import eventReducer from '../features/events/eventsSlice';
+import appartmentReducer from '../features/appartment/appartmentSlice';
+import monthlyReducer from '../features/monthly/monthlySlice';
 const sessionPersistConfig = {
   key: 'root',
-  storage: sessionStorage, // Use session storage for most reducers
-  whitelist: ['employee', 'user', 'units'], // Persist these slices
+  storage: sessionStorage, 
+  whitelist: ['event', 'user', 'appartment','monthly'], 
 };
 
 const rootReducer = combineReducers({
-  employee: employeeReducer,
+  event:eventReducer,
   user: userReducer,
+  appartment:appartmentReducer,
+  monthly:monthlyReducer
 });
 
 const persistedReducer = persistReducer(sessionPersistConfig, rootReducer);
@@ -24,7 +27,7 @@ const store = configureStore({
   reducer: persistedReducer,
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
-      serializableCheck: false, // Disable serializable check for Redux Persist
+      serializableCheck: false, 
     }),
 });
 

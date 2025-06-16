@@ -9,6 +9,9 @@ import {
   Users,
   ChartNoAxesGantt,
   MonitorCog,
+  Book,
+  ParenthesesIcon,
+  Church,
 } from 'lucide-react';
 import { NavMain } from '@/components/nav-main';
 import {
@@ -30,29 +33,32 @@ import { removeSessionItem } from '@/lib/helperFunction';
 export function AppSidebar(props: React.ComponentProps<typeof Sidebar>) {
   const navigate = useNavigate();
   const { state, toggleSidebar } = useSidebar();
-  const { isNodalOfficer, isSuperAdmin, isAdmin, isUnitCGM } = useUserRoles();
-  const hasAccess = isNodalOfficer || isSuperAdmin || isAdmin || isUnitCGM;
+  const { isAdmin} = useUserRoles();
+  const hasAccess = isAdmin ;
   const navMainItems = [
     {
-      title: 'Home',
-      url: '/home',
+      title: 'Monthly Report',
+      url: '/monthly-report',
       icon: Home,
     },
-    {
-      title: 'Our Leadership',
-      url: '/our-leadership',
-      icon: Users,
+     {
+      title: 'Event Glimpse',
+      url: '/event-manage',
+      icon: Church,
+    },
+      {
+      title: 'Notice',
+      url: '/notice',
+      icon: Book,
     },
     {
-      title: 'Organization Structure',
-      url: '/organization-structure',
-      icon: ChartNoAxesGantt,
+      title: 'Reset Password',
+      url: '/reset',
+      icon:ParenthesesIcon,
     },
-    {
-      title: 'Applications ',
-      url: '/applications',
-      icon: MonitorCog,
-    },
+  
+   
+  
   ].filter(Boolean);
 
   const handleLogout = () => {
@@ -75,19 +81,7 @@ export function AppSidebar(props: React.ComponentProps<typeof Sidebar>) {
       </SidebarContent>
       <SidebarFooter>
         <SidebarMenu>
-          {hasAccess && (
-            <SidebarMenuButton
-              onClick={() => navigate('/admin-dashboard')}
-              asChild
-              tooltip={'Manage Organization'}
-              className={`transition-all text-black cursor-pointer duration-300  active:bg-primary [&>svg]:size-7 ease-in-out hover:bg-primary hover:text-white h-full w-full active:text-white`}
-            >
-              <div className={`flex items-center gap-2`}>
-                <Hotel size={24} />
-                <span>Manage Organization</span>
-              </div>
-            </SidebarMenuButton>
-          )}
+        
           <Separator />
 
           <SidebarMenuButton

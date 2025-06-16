@@ -1,0 +1,65 @@
+[
+  {
+    "id": "1",
+    "title": "Annual Fest",
+    "theme": "Diffrent Cultural Activities and Dressing",
+    "section": "",
+    "image": "https://gulshangroup.com/wp-content/uploads/2024/02/New-Year-Party-2024-1.webp",
+    "description": "A grand celebration with music, food, and fun activities for all residents.",
+    "date": "2024-12-15"
+  },
+  {
+    "id": "2",
+    "title": "Sports Day",
+    "theme": "Sports Day",
+    "section": "",
+    "image": "https://gulshangroup.com/wp-content/uploads/2024/02/New-Year-Party-2024-1.webp",
+    "description": "Exciting sports competitions and games for all age groups.",
+    "date": "2024-11-10"
+  },
+  {
+    "id": "3",
+    "title": "Community Meetups",
+    "theme": "Monthly Community Gatherings",
+    "section": "",
+    "image": "https://gulshangroup.com/wp-content/uploads/2024/02/New-Year-Party-2024-1.webp",
+    "description": "Regular gatherings to foster community spirit and networking.",
+    "date": "2024-10-05"
+  },
+  {
+    "id": "4",
+    "title": "Workshops & Seminars",
+    "theme": "Skill Development Workshop",
+    "section": "",
+    "image": "https://gulshangroup.com/wp-content/uploads/2024/02/New-Year-Party-2024-1.webp",
+    "description": "Educational and skill-building sessions for residents.",
+    "date": "2024-09-20"
+  },
+  {
+    "id": "5",
+    "title": "Holi",
+    "theme": "Colors of Harmony",
+    "section": "",
+    "image": "https://gulshangroup.com/wp-content/uploads/2024/04/holi-event-1.webp",
+    "description": "Celebrate the festival of colors with music, dance, and traditional sweets.",
+    "date": "2025-03-14"
+  },
+  {
+    "id": "6",
+    "title": "Diwali",
+    "theme": "Lights Festival",
+    "section": "",
+    "image": "https://gulshangroup.com/wp-content/uploads/2024/02/New-Year-Party-2024-1.webp",
+    "description": "Festival of lights with decorations, fireworks, and community dinner.",
+    "date": "2024-11-01"
+  },
+  {
+    "id": "7",
+    "title": "26 Jan Fest",
+    "theme": "Independence Day Celebration",
+    "section": "",
+    "image": "https://gulshangroup.com/wp-content/uploads/2024/02/New-Year-Party-2024-1.webp",
+    "description": "Republic Day celebrations with flag hoisting, cultural performances, and patriotic activities.",
+    "date": "2025-01-26"
+  }
+]

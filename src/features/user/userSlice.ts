@@ -1,27 +1,17 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
 interface UserState {
-  Roles: string | null;
-  unique_name: string | null;
-  EmpCode: string | null;
-  Designation: string | null;
-  Unit: string | null;
-  unitId: string | null;
-  Lavel: string | null; // Assuming "Level" was intended, but keeping as provided
-  Department: string | null;
-  exp: number | null;
+  role: string | null;
+  users: string[] | null;
+  loading: boolean;
+  error: string | null;
 }
 
 const initialState: UserState = {
-  Roles: null,
-  unique_name: null,
-  EmpCode: null,
-  Designation: null,
-  Unit: null,
-  unitId: null,
-  Lavel: null,
-  Department: null,
-  exp: null,
+  role: null,
+  users: null,
+  loading: false,
+  error: null,
 };
 
 const userSlice = createSlice({

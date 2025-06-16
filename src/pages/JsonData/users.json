@@ -1,0 +1,18 @@
+[
+  {
+    "id": 1,
+    "role": "admin",
+    "email": "admin@example.com",
+    "password": "adminpass",
+    "otp": "123456",
+    "token": "admintoken"
+  },
+  {
+    "id": 2,
+    "role": "user",
+    "email": "user@example.com",
+    "password": "userpass",
+    "otp": "654321",
+    "token": "usertoken"
+  }
+]

@@ -9,8 +9,9 @@ import Loader from '@/components/ui/loader';
 
 const AdminPrivateRoute: React.FC = () => {
   const isAuthenticated = true;
-  const { isNodalOfficer, isSuperAdmin, isAdmin, isUnitCGM, isLoading } = useUserRoles();
-  const hasAccess = isNodalOfficer || isSuperAdmin || isAdmin || isUnitCGM;
+  const { isAdmin } = useUserRoles();
+  const hasAccess = isAdmin;
+  const isLoading = false;
 
   if (isLoading) {
     return <Loader />;

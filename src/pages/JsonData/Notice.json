@@ -1,0 +1,24 @@
+{
+  "title": "Power Maintenance Notice",
+  "type": "Urgent",
+  "issued_on": "2025-06-09",
+  "icon": "🔔",
+  "description": "Please be informed that there will be a scheduled power outage due to essential maintenance work.",
+  "details": {
+    "date": "2025-06-10",
+    "time": "10:00 AM to 2:00 PM",
+    "affected_blocks": ["Block B", "Block C"]
+  },
+  "additional_info": "We request all residents to make necessary arrangements. We apologize for the inconvenience and appreciate your cooperation.",
+  "contact": {
+    "name": "Mr. Sharma",
+    "phone": "98765-43210"
+  },
+  "authorized_by": {
+    "role": "Secretary",
+    "name": "Rajeev Mehta"
+  },
+  "attachment": {
+    "pdf": "notice-power-maintenance-june10.pdf"
+  }
+}
