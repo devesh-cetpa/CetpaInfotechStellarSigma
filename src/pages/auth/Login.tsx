@@ -13,31 +13,7 @@ import { jwtDecode } from 'jwt-decode';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 
-// Mock logo
-const logo = 'data:image/svg+xml,...';
 
-// Mock data
-const mockFlats = [
-  { id: 1, flatNumber: 'A-101' },
-  { id: 2, flatNumber: 'A-102' },
-  { id: 3, flatNumber: 'A-103' },
-  { id: 4, flatNumber: 'B-201' },
-  { id: 5, flatNumber: 'B-202' },
-  { id: 6, flatNumber: 'B-203' },
-  { id: 7, flatNumber: 'C-301' },
-  { id: 8, flatNumber: 'C-302' },
-];
-
-const mockEmails = {
-  'A-101': 'user1@example.com',
-  'A-102': 'user2@example.com',
-  'A-103': 'user3@example.com',
-  'B-201': 'user4@example.com',
-  'B-202': 'user5@example.com',
-  'B-203': 'user6@example.com',
-  'C-301': 'user7@example.com',
-  'C-302': 'user8@example.com',
-};
 
 const Login = () => {
   const [loginMode, setLoginMode] = useState('otp');

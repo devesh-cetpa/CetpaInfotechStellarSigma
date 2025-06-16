@@ -1,18 +1,16 @@
 import * as React from 'react';
 import {
-  LayoutGrid,
   LogOut,
-  Hotel,
   ChevronsLeft,
   ChevronsRight,
   Home,
-  Users,
-  ChartNoAxesGantt,
-  MonitorCog,
   Book,
   ParenthesesIcon,
   Church,
+  Users,
+  MonitorCog,
 } from 'lucide-react';
+
 import { NavMain } from '@/components/nav-main';
 import {
   Sidebar,
@@ -24,79 +22,102 @@ import {
   SidebarSeparator,
   useSidebar,
 } from '@/components/ui/sidebar';
-import { environment } from '@/config';
+
 import { Separator } from '@radix-ui/react-separator';
-import { useNavigate } from 'react-router';
+import { environment } from '@/config';
 import useUserRoles from '@/hooks/useUserRoles';
 import { removeSessionItem } from '@/lib/helperFunction';
 
 export function AppSidebar(props: React.ComponentProps<typeof Sidebar>) {
-  const navigate = useNavigate();
   const { state, toggleSidebar } = useSidebar();
-  const { isAdmin} = useUserRoles();
-  const hasAccess = isAdmin ;
-  const navMainItems = [
+  const { isAdmin, isUser } = useUserRoles();
+
+  // 🔐 Admin-specific routes
+  const userRoutes = [
+    {
+      title: 'Manage Users',
+      url: '/admin/users',
+      icon: Users,
+    },
+    {
+      title: 'System Settings',
+      url: '/admin/settings',
+      icon: MonitorCog,
+    },
+    {
+      title: 'Notice',
+      url: '/notice',
+      icon: Book,
+    },
+  ];
+
+  // 👤 User-specific routes
+  const adminRoutes = [
     {
       title: 'Monthly Report',
       url: '/monthly-report',
       icon: Home,
     },
-     {
+    {
       title: 'Event Glimpse',
       url: '/event-manage',
       icon: Church,
     },
-      {
-      title: 'Notice',
-      url: '/notice',
-      icon: Book,
-    },
     {
       title: 'Reset Password',
       url: '/reset',
-      icon:ParenthesesIcon,
+      icon: ParenthesesIcon,
     },
-  
-   
-  
-  ].filter(Boolean);
+  ];
+
+  // 🔄 Merge routes based on roles
+  const navMainItems = [
+    ...(isUser ? userRoutes : []),
+    ...(isAdmin ? adminRoutes : []),
+  ];
 
   const handleLogout = () => {
-    removeSessionItem('token');
+    sessionStorage.removeItem('token');
+    sessionStorage.removeItem('userData');
     window.location.href = environment.logoutUrl;
   };
 
   return (
-    <Sidebar collapsible="icon" {...props} className="">
-      <div className="flex justify-end md:pt-[90px] ">
+    <Sidebar collapsible="icon" {...props}>
+      {/* Sidebar Toggle */}
+      <div className="flex justify-end md:pt-[90px] px-2">
         {state === 'collapsed' ? (
-          <ChevronsRight onClick={toggleSidebar} className="w-8 h-8 cursor-pointer" />
+          <ChevronsRight onClick={toggleSidebar} className="w-6 h-6 cursor-pointer" />
         ) : (
-          <ChevronsLeft onClick={toggleSidebar} className="w-8 h-8 cursor-pointer" />
+          <ChevronsLeft onClick={toggleSidebar} className="w-6 h-6 cursor-pointer" />
         )}
       </div>
+
       <SidebarSeparator />
-      <SidebarContent className="flex justify-between">
+
+      {/* Navigation Section */}
+      <SidebarContent className="flex flex-col justify-between">
         <NavMain items={navMainItems} />
       </SidebarContent>
+
+      {/* Logout Section */}
       <SidebarFooter>
         <SidebarMenu>
-        
           <Separator />
-
           <SidebarMenuButton
             onClick={handleLogout}
             asChild
-            tooltip={'Exit'}
-            className={`transition-all cursor-pointer duration-300  active:bg-primary [&>svg]:size-7 ease-in-out hover:bg-primary hover:text-white h-full w-full`}
+            tooltip="Exit"
+            className="transition-all duration-300 cursor-pointer active:bg-primary hover:bg-primary hover:text-white w-full h-full [&>svg]:size-6"
           >
-            <div className={`flex items-center gap-2`}>
-              <LogOut size={24} />
+            <div className="flex items-center gap-2">
+              <LogOut />
               <span>Exit</span>
             </div>
           </SidebarMenuButton>
         </SidebarMenu>
       </SidebarFooter>
+
       <SidebarRail />
     </Sidebar>
   );

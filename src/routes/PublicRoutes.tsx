@@ -3,19 +3,19 @@ import { Navigate, Outlet } from 'react-router';
 import AppLayout from '@/components/layout/app-layout';
 import { getSessionItem } from '@/lib/helperFunction';
 
-const PrivateRoute: React.FC = () => {
+const PublicRoute: React.FC = () => {
   const token = getSessionItem('token');
   const userDataRaw = sessionStorage.getItem('userData');
 
   let isAuthenticated = false;
-  let isAdmin = false;
+  let isUser = false;
 
   if (token && userDataRaw) {
     try {
       const userData = JSON.parse(userDataRaw);
       const role = userData?.role?.toLowerCase();
-      isAdmin = role === 'admin';
-      isAuthenticated = isAdmin; // Only true if admin
+      isUser = role === 'user';
+      isAuthenticated = isUser; // Only authenticated if role is user
     } catch (error) {
       console.error('Invalid userData in sessionStorage:', error);
     }
@@ -32,4 +32,4 @@ const PrivateRoute: React.FC = () => {
   );
 };
 
-export default PrivateRoute;
+export default PublicRoute;

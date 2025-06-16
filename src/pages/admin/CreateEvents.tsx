@@ -30,6 +30,7 @@ import { Plus, Pencil, Trash2, X, ImageIcon, Eye } from "lucide-react";
 import axiosInstance from "../../services/axiosInstance";
 import { environment } from "../../config";
 import { useAppSelector } from "@/app/hooks";
+import toast from "react-hot-toast";
 
 interface EventData {
   id: number;
@@ -368,52 +369,56 @@ const CreateEvents: React.FC = () => {
     }
   }, [formData]);
 
-const handleUpdateEvent = useCallback(
-  async (eventId: number) => {
-    if (!formData.title || !formData.theme || !formData.description || !formData.date) {
-      alert("Please fill all required fields");
-      return;
+const handleUpdateEvent = useCallback(async (eventId: number) => {
+  if (!formData.title || !formData.theme || !formData.description || !formData.date) {
+    alert("Please fill all required fields");
+    return;
+  }
+
+  setIsSubmitting(true);
+  try {
+    const formDataToSend = new FormData();
+    formDataToSend.append("Title", formData.title);
+    formDataToSend.append("Theme", formData.theme);
+    formDataToSend.append("Description", formData.description);
+    formDataToSend.append("Date", formData.date);
+
+    // Only append image if a new one was selected
+    if (formData.image instanceof File) {
+      formDataToSend.append("Image", formData.image);
     }
 
-    setIsSubmitting(true);
-    try {
-      const formDataToSend = new FormData();
-      formDataToSend.append("Title", formData.title);
-      formDataToSend.append("Theme", formData.theme);
-      formDataToSend.append("Description", formData.description);
-      formDataToSend.append("Date", formData.date);
+    // Add debug logging
+    console.log(`Attempting to update event ${eventId} at URL:`, 
+      `${environment.apiUrl}api/Events/${eventId}`);
 
-      // Only append image if a new one was selected
-      if (formData.image instanceof File) {
-        formDataToSend.append("Image", formData.image);
+    const response = await axiosInstance.put(
+      `${environment.apiUrl}api/Events/${eventId}`,
+      formDataToSend,
+      {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
       }
+    );
 
-       await axiosInstance.put(
-        `${environment.apiUrl}api/Events/${eventId}`,
-        formDataToSend,
-        {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-        }
-      );
+    console.log("Update response:", response);
 
-      // Reset form and close modal
-      setIsModalOpen(false);
-      resetForm();
-      
-      // Show success message
-      alert("Event updated successfully!");
-    } catch (error: any) {
-      console.error("Error updating event:", error);
-      alert(`Failed to update event: ${error.response?.data?.message || error.message}`);
-    } finally {
-      setIsSubmitting(false);
-    }
-  },
-  [formData]
-);
-
+    // Reset form and close modal
+    setIsModalOpen(false);
+    resetForm();
+    
+    // Show success message
+    alert("Event updated successfully!");
+  } catch (error: any) {
+    console.error("Error updating event:", error);
+    const errorDetails = error.response?.data || error.message;
+    console.error("Error details:", errorDetails);
+    alert(`Failed to update event: ${error.response?.data?.message || error.message}`);
+  } finally {
+    setIsSubmitting(false);
+  }
+}, [formData]);
 
  const handleDeleteEvent = useCallback(
   async (eventId: number) => {

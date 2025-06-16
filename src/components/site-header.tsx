@@ -11,8 +11,9 @@ import { AlignJustify, Power } from 'lucide-react';
 import { SidebarTrigger, useSidebar } from './ui/sidebar';
 
 const SiteHeader: React.FC<{ showtoggle?: boolean }> = ({ showtoggle = false }) => {
-  const user = useSelector((state: RootState) => state.user);
-  console.log(user,"user");
+  // const user = useSelector((state: RootState) => state.user);
+  // console.log(user,"user");
+const user = JSON.parse(sessionStorage.getItem("userData") || '{}');
   const { toggleSidebar } = useSidebar();
 
   return (
@@ -34,9 +35,18 @@ const SiteHeader: React.FC<{ showtoggle?: boolean }> = ({ showtoggle = false }) 
           {showtoggle && (
             <div className="hidden md:block text-gray-800 text-md md:text-lg font-semibold">{user.unique_name}</div>
           )}
-          <Button variant="outline" size="icon" onClick={() => (window.location.href = environment.powerOffUrl)}>
-            <Power className="w-5 h-5" />
-          </Button>
+         <Button
+  variant="outline"
+  size="icon"
+  onClick={() => {
+    sessionStorage.clear(); 
+    removeSessionItem('userData'); 
+       window.location.href = environment.powerOffUrl; 
+  }}
+>
+  <Power className="w-5 h-5" />
+</Button>
+
         </div>
       </div>
     </header>
