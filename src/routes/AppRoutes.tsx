@@ -31,17 +31,14 @@ const AppRoutes = () => {
 
       <Route element={<PrivateRoute />}>
         <Route path="/monthly-report" element={<UserMonthlyReport />} />
-             <Route path="/event-manage" element={<CreateEvents />} />
-              
-             <Route path="/reset" element={<ResetPassword />} />
+        <Route path="/event-manage" element={<CreateEvents />} />
+        <Route path="/reset" element={<ResetPassword />} />
         {/* <Route path="/dashboard" element={<Dashboard />} /> */}
       </Route>
 
-      
-      <Route element={<PublicRoute/>}>
-       
-                <Route path="/report-monthly" element={<MonthlyReport />} />
-             <Route path="/reset-password" element={<ResettPassword />} />
+      <Route element={<PublicRoute />}>
+        <Route path="/monthly" element={<MonthlyReport />} />
+        <Route path="/reset-password" element={<ResettPassword />} />
         {/* <Route path="/dashboard" element={<Dashboard />} /> */}
       </Route>
       <Route path="*" element={<NotFound />} />

@@ -15,7 +15,7 @@ const Footer = () => {
   const currentYear = new Date().getFullYear();
 
   return (
-    <footer className="relative overflow-hidden bg-gradient-to-b from-[#061C36] to-[#04162B] text-white">
+    <footer className="relative overflow-hidden bg-gradient-to-b from-[#4a96f3] to-[#031122] text-white">
       {/* Decorative elements */}
       <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-[#D32F2F] via-[#004A89] to-[#D32F2F]"></div>
 
@@ -54,14 +54,15 @@ const Footer = () => {
           <div className="md:col-span-4">
             <div className="flex  mb-6 flex-col">
               <img
-                src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQzM4Y6zmNiyNa0f6vpZp4Exm6uLv0y4I9Abg&s"
-                alt="DFCCIL Logo"
+                src="/public/favicon.png"
+                alt="Sigma Logo"
                 className="h-auto w-28 mr-3"
               />
               <h1 className="font-bold text-white">Stellar Sigma Villas</h1>
             </div>
 
-            <p className="text-gray-300 mb-6">Welcome Seetlar Sigma Family</p>
+            <p className="text-gray-300 mb-6">Stellar Constructions launches its latest residential project, </p>
+            <p className="text-gray-300 mb-6"> Stellar Sigma in Greater Noida.</p>
 
             <div className="flex space-x-4">
               <a

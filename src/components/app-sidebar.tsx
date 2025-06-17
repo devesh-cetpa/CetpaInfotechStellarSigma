@@ -36,7 +36,7 @@ export function AppSidebar(props: React.ComponentProps<typeof Sidebar>) {
   const userRoutes = [
     {
       title: 'Monthly Report',
-      url: 'report-monthly',
+      url: '/monthly',
       icon: Users,
     }
  ,  {

@@ -45,71 +45,82 @@ const clearData=()=>{
   };
 
   return (
-    <div className="w-full max-w-4xl mx-auto mt-10 px-6">
-      <h1 className="text-2xl font-bold mb-6 text-gray-800">Reset Password</h1>
-
-      {/* Row 1: Email + New Password */}
-      <div className="flex flex-col md:flex-row gap-4 mb-4">
-        <div className="flex flex-col w-full">
-          <Label htmlFor="email">Email</Label>
-          <Input
-            id="email"
-            type="email"
-            placeholder="Enter your email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            className="focus:ring-2 focus:ring-blue-500 transition-all"
-          />
+   <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-white to-blue-100 px-2 py-4">
+      <div className="w-full max-w-sm bg-white rounded-xl shadow-lg border border-gray-100 p-5">
+        <div className="mb-4 text-center">
+          <h1 className="text-2xl font-bold text-blue-800 mb-1">Reset Password</h1>
+          <p className="text-gray-500 text-sm">
+            Set a new password for your account.
+          </p>
         </div>
-
-        <div className="flex flex-col w-full">
-          <Label htmlFor="newPassword">New Password</Label>
-          <Input
-            id="newPassword"
-            type="password"
-            placeholder="New password"
-            value={newPassword}
-            onChange={(e) => {
-              setNewPassword(e.target.value);
-              setTouched(true);
-            }}
-            className="focus:ring-2 focus:ring-blue-500 transition-all"
-          />
-        </div>
-      </div>
-
-      {/* Row 2: Confirm Password + Button */}
-      <div className="flex flex-col md:flex-row gap-4 items-end">
-        <div className="flex flex-col w-full">
-          <Label htmlFor="confirmPassword">Confirm Password</Label>
-          <Input
-            id="confirmPassword"
-            type="password"
-            placeholder="Confirm password"
-            value={confirmPassword}
-            onChange={(e) => {
-              setConfirmPassword(e.target.value);
-              setTouched(true);
-            }}
-            className={`focus:ring-2 transition-all ${
-              touched && !passwordsMatch
-                ? 'border-red-500 ring-red-200'
-                : 'focus:ring-blue-500'
-            }`}
-          />
-          {touched && !passwordsMatch && (
-            <p className="text-sm text-red-500 mt-1">Passwords do not match</p>
-          )}
-        </div>
-
-        <Button
-          className="h-10 w-full md:w-32 transition-all"
-          disabled={!isValid}
-          variant={isValid ? 'default' : 'secondary'}
-          onClick={handleReset}
+        <form
+          onSubmit={e => {
+            e.preventDefault();
+            if (isValid) handleReset();
+          }}
+          className="space-y-4"
         >
-          Reset
-        </Button>
+          <div>
+            <Label htmlFor="email" className="mb-0.5 block text-gray-700 text-sm">
+              Email
+            </Label>
+            <Input
+              id="email"
+              type="email"
+              value={email}
+              autoComplete="username"
+              disabled
+              className="text-sm"
+            />
+          </div>
+          <div>
+            <Label htmlFor="newPassword" className="mb-0.5 block text-gray-700 text-sm">
+              New Password
+            </Label>
+            <Input
+              id="newPassword"
+              type="password"
+              placeholder="New password"
+              value={newPassword}
+              autoComplete="new-password"
+              onChange={e => {
+                setNewPassword(e.target.value);
+                setTouched(true);
+              }}
+              className="text-sm"
+            />
+          </div>
+          <div>
+            <Label htmlFor="confirmPassword" className="mb-0.5 block text-gray-700 text-sm">
+              Confirm Password
+            </Label>
+            <Input
+              id="confirmPassword"
+              type="password"
+              placeholder="Confirm password"
+              value={confirmPassword}
+              autoComplete="new-password"
+              onChange={e => {
+                setConfirmPassword(e.target.value);
+                setTouched(true);
+              }}
+              className={`text-sm ${
+                touched && !passwordsMatch ? 'border-red-500' : ''
+              }`}
+            />
+            {touched && !passwordsMatch && (
+              <p className="text-xs text-red-500 mt-0.5">Passwords do not match</p>
+            )}
+          </div>
+          <Button
+            type="submit"
+            className="w-full h-10 text-base font-semibold bg-blue-700 hover:bg-blue-800 rounded-lg"
+            disabled={!isValid}
+            variant={isValid ? 'default' : 'secondary'}
+          >
+            Reset Password
+          </Button>
+        </form>
       </div>
     </div>
   );

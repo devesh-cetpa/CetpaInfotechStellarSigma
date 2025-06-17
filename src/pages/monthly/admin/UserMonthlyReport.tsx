@@ -6,13 +6,13 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from '@/components/ui/table';
 import { useAppDispatch, useAppSelector } from '@/app/hooks';
 import { fetchMontlyReport } from '@/features/monthly/monthlySlice';
-import PdfViewer from '@/components/common/PdfViewer';
 import { environment } from '@/config';
 import axiosInstance from '@/services/axiosInstance';
 import toast from 'react-hot-toast';
 
+
 const currentYear = new Date().getFullYear();
-const years = Array.from({ length: 21 }, (_, i) => (currentYear - 5 + i).toString());
+const years = Array.from({ length: 10 }, (_, i) => (currentYear - i).toString());
 
 const months = [
   { value: '01', label: 'January' },
@@ -39,6 +39,11 @@ const UserMonthlyReport: React.FC = () => {
   const [viewPdfUrl, setViewPdfUrl] = useState<string | null>(null);
   const [reportForms, setReportForms] = useState([{ year: '', month: '', comment: '', file: null as File | null }]);
   const [deletingReportId, setDeletingReportId] = useState<number | null>(null);
+   const [numPages, setNumPages] = useState<number | null>(null);
+
+  const onLoadSuccess = ({ numPages }: { numPages: number }) => {
+    setNumPages(numPages);
+  };
 
   useEffect(() => {
     dispatch(fetchMontlyReport());
@@ -61,12 +66,14 @@ const UserMonthlyReport: React.FC = () => {
     (updated[index] as any)[field] = value;
     setReportForms(updated);
   };
+
   const createMonthlyReport = async (formData: FormData) => {
     const { data } = await axiosInstance.post(`${environment.apiUrl}api/SocietyMonthly`, formData, {
       headers: { 'Content-Type': 'multipart/form-data' },
     });
     return data;
   };
+
   const handleUploadReports = async () => {
     try {
       for (const form of reportForms) {
@@ -85,7 +92,6 @@ const UserMonthlyReport: React.FC = () => {
         }
       }
 
-      // Success feedback
       setIsModalOpen(false);
       setReportForms([{ year: '', month: '', comment: '', file: null }]);
     } catch (error) {
@@ -99,6 +105,7 @@ const UserMonthlyReport: React.FC = () => {
 
   const closePdfViewer = () => {
     setViewPdfUrl(null);
+    setNumPages(0); // Reset pages on close
   };
 
   const handleDeleteReport = async (id: number) => {
@@ -110,7 +117,7 @@ const UserMonthlyReport: React.FC = () => {
 
       if (response.status === 200 || response.status === 204) {
         toast.success('Report deleted successfully!');
-              dispatch(fetchMontlyReport());
+        dispatch(fetchMontlyReport());
       } else {
         throw new Error(`Unexpected response status: ${response.status}`);
       }
@@ -190,13 +197,9 @@ const UserMonthlyReport: React.FC = () => {
           <DialogHeader className="p-6 pb-0">
             <DialogTitle>Monthly Report</DialogTitle>
           </DialogHeader>
-          {viewPdfUrl && (
-            <div className="w-full h-[75vh] p-6 pt-0">
-              <div className="w-full h-full border rounded-lg overflow-hidden bg-gray-100">
-                <PdfViewer fileUrl={viewPdfUrl} />
-              </div>
-            </div>
-          )}
+
+    <iframe src={viewPdfUrl} width="100%" height="600px" />
+
         </DialogContent>
       </Dialog>
 
@@ -308,5 +311,5 @@ const UserMonthlyReport: React.FC = () => {
     </div>
   );
 };
-
 export default UserMonthlyReport;
+

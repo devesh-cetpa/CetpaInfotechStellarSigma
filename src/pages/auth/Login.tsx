@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select';
-import { BadgeCheck, ChevronRight, HelpCircle, UserPlus, LockKeyhole, Mail, Shield, Home, Send } from 'lucide-react';
+import { BadgeCheck, ChevronRight, HelpCircle, UserPlus, LockKeyhole, Mail, Shield, Home, Send, ArrowLeft } from 'lucide-react';
 import { useAppDispatch, useAppSelector } from '@/app/hooks';
 import { fetchAllApartments } from '@/features/appartment/appartmentSlice';
 import toast from 'react-hot-toast';
@@ -104,7 +104,8 @@ const Login = () => {
         setOtpSent(true);
         setOtpVerified(false);
         setOtp('');
-        toast.success(`OTP sent to ${otpModeEmail}`);
+        // toast.success(`OTP sent Successfully to ${otpModeEmail}`);
+        toast.success(`OTP sent Successfully to ${maskEmail(otpModeEmail)}`);
       } else {
         toast.error('Failed to send OTP');
       }
@@ -145,7 +146,7 @@ const Login = () => {
         if (String(userData.role).toLowerCase() === 'admin') {
           navigate('/monthly-report');
         } else if (String(userData.role).toLowerCase() === 'user') {
-          navigate('/report-monthly');
+          navigate('/monthly');
         } else {
           navigate('/login');
         }
@@ -222,7 +223,7 @@ const Login = () => {
   };
 
   const handleHelp = () => {
-    alert('For help:\n1. Select apartment\n2. Send OTP\n3. Enter OTP\n\nDemo OTP: 123456');
+  navigate('/')
   };
 
   const toggleLoginMode = () => {
@@ -241,7 +242,14 @@ const Login = () => {
     setOtpVerified(false);
     setLoading({ apartment: false, otp: false, verify: false });
   };
-
+function maskEmail(email) {
+  const [local, domain] = email.split('@');
+  if (!domain) return email; // Not a valid email
+  if (local.length <= 4) return `${local}@${domain}`;
+  const visible = local.slice(0, 4);
+  const masked = '*'.repeat(local.length - 4);
+  return `${visible}${masked}@${domain}`;
+}
   return (
     <div className="relative min-h-screen overflow-hidden bg-white">
       {/* Background */}
@@ -316,7 +324,7 @@ const Login = () => {
                       <div className="flex gap-2">
                         <Input
                           type="email"
-                          value={otpModeEmail}
+                         value={maskEmail(otpModeEmail)}
                           readOnly
                           className="flex-1 px-3 py-2 text-sm border border-gray-300 rounded-md bg-gray-50"
                         />
@@ -433,17 +441,17 @@ const Login = () => {
                   <Button onClick={toggleLoginMode} variant="outline" className="flex-1 h-10 border-gray-300">
                     {loginMode === 'otp' ? (
                       <>
-                        <UserPlus className="w-4 h-4 mr-2" /> Password Login
+                        <UserPlus className="w-4 h-4 mr-2" /> Login with Password
                       </>
                     ) : (
                       <>
-                        <Shield className="w-4 h-4 mr-2" /> OTP Login
+                        <Shield className="w-4 h-4 mr-2" /> Login with OTP
                       </>
                     )}
                   </Button>
                   <Button onClick={handleHelp} variant="outline" className="flex-1 h-10 border-gray-300">
-                    <HelpCircle className="w-4 h-4 mr-2" />
-                    Help
+                   
+                   <ArrowLeft className="w-4 h-4 mr-2" /> Back To Home
                   </Button>
                 </div>
 

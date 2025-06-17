@@ -2,21 +2,22 @@ import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { MapPin, Navigation, Phone, Clock, ExternalLink } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Link } from 'react-router';
 
 const Location = () => {
   const [mapLoaded, setMapLoaded] = useState(false);
-  
+
   const address = {
-    name: "Stellar Sigma Apartments",
-    street: "Plot No 74, Sector, Stellar Sigma,",
-    area: "Sigma IV, Greater Noida,",
-    state: "Uttar Pradesh 201310",
-    coordinates: { lat: 28.4595, lng: 77.5120 } // Approximate coordinates for Greater Noida
+    name: 'Stellar Sigma Apartments',
+    street: 'Plot No 74, Sector, Stellar Sigma,',
+    area: 'Sigma IV, Greater Noida,',
+    state: 'Uttar Pradesh 201310',
+    coordinates: { lat: 28.4595, lng: 77.512 }, // Approximate coordinates for Greater Noida
   };
 
   const contactInfo = [
-    { icon: Phone, label: "Phone", value: "+91 98765 43210" },
-    { icon: Clock, label: "Open Hours", value: "Mon-Sun: 9:00 AM - 6:00 PM" }
+    { icon: Phone, label: 'Phone', value: '+91 98765 43210' },
+    { icon: Clock, label: 'Open Hours', value: 'Mon-Sun: 9:00 AM - 6:00 PM' },
   ];
 
   return (
@@ -32,16 +33,15 @@ const Location = () => {
                 Our Location
               </CardTitle>
               <p className="text-gray-600 text-lg max-w-2xl mx-auto">
-                Visit us at our prime address and experience the heart of Greater Noida. 
-                We're conveniently located in the modern Stellar Sigma complex.
+                Visit us at our prime address and experience the heart of Greater Noida. We're conveniently located in
+                the modern Stellar Sigma complex.
               </p>
             </div>
           </CardHeader>
-          
+
           <CardContent className="space-y-8">
             {/* Main Content Grid */}
             <div className="grid lg:grid-cols-2 gap-8 items-start">
-              
               {/* Address and Contact Info */}
               <div className="space-y-6">
                 {/* Address Card */}
@@ -76,15 +76,6 @@ const Location = () => {
                     ))}
                   </div>
                 </div>
-
-                {/* Quick Actions */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <Button className="flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-3 rounded-xl shadow-lg transition-all duration-200 hover:shadow-xl hover:scale-105">
-                    <Navigation className="w-5 h-5" />
-                    Get Directions
-                  </Button>
-                
-                </div>
               </div>
 
               {/* Map Section */}
@@ -100,33 +91,30 @@ const Location = () => {
                       </div>
                     </div>
                   )}
-                  <iframe
-                    title="Stellar Sigma Apartments Location"
-                    src={`https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3508.123456789!2d77.5120!3d28.4595!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMjjCsDI3JzM0LjIiTiA3N8KwMzAnNDMuMiJF!5e0!3m2!1sen!2sin!4v1234567890123!5m2!1sen!2sin`}
-                    
-                    width="100%"
-                    height="100%"
-                    style={{ border: 0 }}
-                    allowFullScreen={true}
-                    loading="lazy"
-                    referrerPolicy="no-referrer-when-downgrade"
-                    onLoad={() => setMapLoaded(true)}
-                    className="rounded-2xl"
-                  />
+                  <div className="relative w-full h-[600px] rounded-2xl overflow-hidden shadow-xl border border-gray-200">
+                    <iframe
+                      src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2891.3652069473633!2d77.55685937450247!3d28.449203092383986!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x390cc1007148a743%3A0x840e6479cd9d8603!2sStellar%20Sigma%20Apartments%20and%20Villas!5e1!3m2!1sen!2sin!4v1750161538614!5m2!1sen!2sin"
+                      width="600"
+                      height="550"
+                      style={{ border: '0' }}
+                      allowFullScreen
+                      loading="lazy"
+                      referrerpolicy="no-referrer-when-downgrade"
+                    />
+                  </div>
                 </div>
-                
+
                 {/* Map Actions */}
                 <div className="flex flex-col sm:flex-row gap-3">
-                  <a
-                    href={`https://www.google.com/maps/search/?api=1&query=${address.coordinates.lat},${address.coordinates.lng}`}
+                  <Link
+                    to={`https://www.google.com/maps/search/?api=1&query=${address.coordinates.lat},${address.coordinates.lng}`}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="flex items-center justify-center gap-2 bg-red-600 hover:bg-red-700 text-white font-semibold px-6 py-3 rounded-xl shadow-lg transition-all duration-200 hover:shadow-xl flex-1"
                   >
                     <ExternalLink className="w-5 h-5" />
                     Open in Google Maps
-                  </a>
-                
+                  </Link>
                 </div>
               </div>
             </div>
@@ -139,9 +127,11 @@ const Location = () => {
                     <MapPin className="w-6 h-6 text-white" />
                   </div>
                   <h4 className="font-bold text-purple-800 mb-2">Prime Location</h4>
-                  <p className="text-gray-600 text-sm">Located in the heart of Greater Noida with excellent connectivity</p>
+                  <p className="text-gray-600 text-sm">
+                    Located in the heart of Greater Noida with excellent connectivity
+                  </p>
                 </div>
-                
+
                 <div className="p-6 bg-gradient-to-br from-orange-50 to-white rounded-2xl border border-orange-200">
                   <div className="w-12 h-12 bg-orange-600 rounded-full flex items-center justify-center mx-auto mb-4">
                     <Navigation className="w-6 h-6 text-white" />
@@ -149,7 +139,7 @@ const Location = () => {
                   <h4 className="font-bold text-orange-800 mb-2">Easy Access</h4>
                   <p className="text-gray-600 text-sm">Well-connected by metro, bus routes, and major highways</p>
                 </div>
-                
+
                 <div className="p-6 bg-gradient-to-br from-teal-50 to-white rounded-2xl border border-teal-200">
                   <div className="w-12 h-12 bg-teal-600 rounded-full flex items-center justify-center mx-auto mb-4">
                     <Clock className="w-6 h-6 text-white" />

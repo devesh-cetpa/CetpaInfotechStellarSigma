@@ -64,7 +64,7 @@ const getMonthLabel = (value: string) => {
 
 const currentYear = new Date().getFullYear();
 const years = [];
-for (let i = currentYear - 10; i <= currentYear + 10; i++) {
+for (let i=currentYear; i>=currentYear-10; i--) {
   years.push(i);
 }
 
@@ -268,7 +268,13 @@ const MonthlyReport: React.FC = () => {
               <div className="flex flex-col items-center">
                 {!error ? (
                   <>
-                    <PdfViewer fileUrl={viewPdfUrl} />
+                    <iframe
+                      src={viewPdfUrl}
+                      width="100%"
+                      height="100%"
+                      title="PDF Viewer"
+                      style={{ border: "none" }}
+                    ></iframe>
                   </>
                 ) : (
                   <div className="flex flex-col items-center justify-center h-40 text-red-500">

@@ -1,296 +1,73 @@
-import React, {
-  useState,
-  useRef,
-  useEffect,
-  useCallback,
-  useMemo,
-} from "react";
-import {
-  Table,
-  TableBody,
-  TableCaption,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-  DialogFooter,
-} from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { Plus, Pencil, Trash2, X, ImageIcon, Eye } from "lucide-react";
-import axiosInstance from "../../services/axiosInstance";
+import React, { useState, useEffect, useCallback } from "react";
+import CreateEventFormAndTable from "./CreateEventFormAndTable";
 import { environment } from "../../config";
-import { useAppSelector } from "@/app/hooks";
+import axiosInstance from "../../services/axiosInstance";
 import toast from "react-hot-toast";
 
-interface EventData {
+import { Button } from "../../components/ui/button";
+import Loader from "@/components/ui/loader";
+
+export interface EventData {
   id: number;
   title: string;
   theme: string;
-  image: string;
-  imagePath?: string;
-  images?: string[];
   description: string;
   date: string;
+  imagePath?: string;
+  image?: string;
   isActive?: boolean;
 }
 
-interface EventImage {
-  id: number;
-  eventId: number;
-  imageUrl: string;
-  partyPic: string;
-}
+const CreateEvents = () => {
+  const [eventsData, setEventsData] = useState<EventData[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [formData, setFormData] = useState<Partial<EventData>>({});
+  const [imageFile, setImageFile] = useState<File | null>(null); // Changed to single file
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-const OptimizedImage = React.memo(
-  ({
-    src,
-    alt,
-    className = "",
-    onError,
-    ...props
-  }: {
-    src: string;
-    alt: string;
-    className?: string;
-    onError?: (e: React.SyntheticEvent<HTMLImageElement, Event>) => void;
-    [key: string]: any;
-  }) => {
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(false);
-    const [currentSrc, setCurrentSrc] = useState(src);
-
-    useEffect(() => {
-      setCurrentSrc(src);
-      setLoading(true);
-      setError(false);
-    }, [src]);
-
-    const handleLoad = useCallback(() => {
-      setLoading(false);
-    }, []);
-
-    const handleError = useCallback(
-      (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
-        setLoading(false);
-        setError(true);
-        if (!currentSrc.includes("placeholder.jpg")) {
-          setCurrentSrc("/placeholder.jpg");
-        }
-        onError?.(e);
-      },
-      [currentSrc, onError]
-    );
-
-    return (
-      <div className={`relative ${className}`}>
-        {loading && !error && (
-          <div className="absolute inset-0 bg-gray-100 animate-pulse rounded-lg flex items-center justify-center">
-            <div className="w-4 h-4 border-2 border-gray-400 border-t-transparent rounded-full animate-spin"></div>
-          </div>
-        )}
-        <img
-          src={currentSrc}
-          alt={alt}
-          className={`${className} ${
-            loading ? "opacity-0" : "opacity-100"
-          } transition-opacity duration-200`}
-          onLoad={handleLoad}
-          onError={handleError}
-          loading="lazy"
-          {...props}
-        />
-      </div>
-    );
-  }
-);
-
-
-function AddImagesModal({
-  isOpen,
-  onClose,
-  onSave,
-  uploading = false,
-}: {
-  isOpen: boolean;
-  onClose: () => void;
-  onSave: (files: File[]) => void;
-  uploading?: boolean;
-}) {
-  const [files, setFiles] = useState<File[]>([]);
-  const [previews, setPreviews] = useState<string[]>([]);
-  const fileInputRef = useRef<HTMLInputElement>(null);
-
-  const handleFileSelect = useCallback(
-    (event: React.ChangeEvent<HTMLInputElement>) => {
-      const selectedFiles = Array.from(event.target.files || []);
-      const imageFiles = selectedFiles.filter((file) =>
-        file.type.startsWith("image/")
+  // Fetch events with error handling
+  const fetchEvents = useCallback(async () => {
+    try {
+      setIsLoading(true);
+      setError(null);
+      const { data } = await axiosInstance.get(
+        `${environment.apiUrl}api/Event`
       );
-
-      if (imageFiles.length !== selectedFiles.length) {
-        alert("Only image files are allowed");
-      }
-
-      setFiles((prev) => [...prev, ...imageFiles]);
-      const newPreviews = imageFiles.map((file) => URL.createObjectURL(file));
-      setPreviews((prev) => [...prev, ...newPreviews]);
-    },
-    []
-  );
-
-  const removeFile = useCallback((index: number) => {
-    setFiles((prev) => prev.filter((_, i) => i !== index));
-    setPreviews((prev) => {
-      if (prev[index]) URL.revokeObjectURL(prev[index]);
-      return prev.filter((_, i) => i !== index);
-    });
+      setEventsData(Array.isArray(data?.data) ? data.data : []);
+    } catch (err) {
+      console.error("Failed to fetch events:", err);
+      setError("Failed to load events.");
+    } finally {
+      setIsLoading(false);
+    }
   }, []);
 
-  const handleSave = useCallback(() => {
-    onSave(files);
-    previews.forEach((url) => URL.revokeObjectURL(url));
-    setFiles([]);
-    setPreviews([]);
-    fileInputRef.current && (fileInputRef.current.value = "");
-  }, [files, previews, onSave]);
+  useEffect(() => {
+    fetchEvents();
+  }, [fetchEvents]);
 
-  const handleClose = useCallback(() => {
-    previews.forEach((url) => URL.revokeObjectURL(url));
-    setFiles([]);
-    setPreviews([]);
-    fileInputRef.current && (fileInputRef.current.value = "");
-    onClose();
-  }, [previews, onClose]);
+  // Reset form state
+  const resetForm = useCallback(() => {
+    setFormData({});
+    setImageFile(null);
+    setIsModalOpen(false);
+    setError(null);
+  }, []);
 
-  return (
-    <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent className="sm:max-w-[700px] max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle className="text-lg font-bold">Upload Images</DialogTitle>
-          <DialogDescription className="text-sm text-gray-500">
-            Choose multiple images for this event. You can preview and remove them before saving.
-          </DialogDescription>
-        </DialogHeader>
+  // Get image preview with cleanup
+  const getImagePreview = useCallback(() => {
+    if (imageFile) {
+      return URL.createObjectURL(imageFile);
+    }
+    if (formData.imagePath) {
+      return formData.imagePath;
+    }
+    return "";
+  }, [imageFile, formData.imagePath]);
 
-        <div className="space-y-4">
-          <div className="flex flex-col gap-1.5">
-            <Label htmlFor="event-images">Images</Label>
-            <Input
-              id="event-images"
-              ref={fileInputRef}
-              type="file"
-              multiple
-              accept="image/*"
-              onChange={handleFileSelect}
-              className="cursor-pointer border-dashed border-2 border-gray-300 hover:border-blue-500 transition duration-200"
-            />
-          </div>
-
-          {files.length > 0 && (
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
-              {files.map((file, index) => (
-                <div
-                  key={index}
-                  className="relative group border rounded-lg overflow-hidden shadow-sm hover:shadow-md transition"
-                >
-                  <div className="aspect-square overflow-hidden bg-gray-100">
-                    {previews[index] ? (
-                      <OptimizedImage
-                        src={previews[index]}
-                        alt={file.name}
-                        className="object-cover w-full h-full transition-transform duration-200 group-hover:scale-105"
-                      />
-                    ) : (
-                      <div className="flex items-center justify-center h-full">
-                        <ImageIcon className="w-8 h-8 text-gray-400" />
-                      </div>
-                    )}
-                  </div>
-                  <p
-                    className="text-xs text-center p-1 truncate text-muted-foreground"
-                    title={file.name}
-                  >
-                    {file.name}
-                  </p>
-                  <button
-                    type="button"
-                    onClick={() => removeFile(index)}
-                    className="absolute top-1 right-1 p-1 bg-red-500 text-white rounded-full shadow hover:bg-red-600 transition-all opacity-0 group-hover:opacity-100"
-                  >
-                    <X className="w-4 h-4" />
-                  </button>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-
-        <DialogFooter className="pt-4">
-          <Button variant="outline" onClick={handleClose} disabled={uploading}>
-            Cancel
-          </Button>
-          <Button
-            onClick={handleSave}
-            disabled={files.length === 0 || uploading}
-            className="flex items-center gap-2"
-          >
-            {uploading ? (
-              <>
-                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                Uploading...
-              </>
-            ) : (
-              <>
-                <Plus className="w-4 h-4" />
-                Add {files.length} Image{files.length !== 1 ? "s" : ""}
-              </>
-            )}
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
-  );
-}
-
-
-
-
-const CreateEvents: React.FC = () => {
-  const [formData, setFormData] = useState<Partial<EventData>>({
-    title: "",
-    theme: "",
-    description: "",
-    date: "",
-  });
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [editingEventId, setEditingEventId] = useState<number | null>(null);
-  const [imagePreview, setImagePreview] = useState("");
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [addImagesModalOpen, setAddImagesModalOpen] = useState(false);
-  const [selectedEventId, setSelectedEventId] = useState<number | null>(null);
-  const [uploading, setUploading] = useState(false);
-  const [eventImages, setEventImages] = useState<{
-    [eventId: number]: EventImage[];
-  }>({});
-  const [attachmentsModalOpen, setAttachmentsModalOpen] = useState(false);
-  const [attachmentsImages, setAttachmentsImages] = useState<EventImage[]>([]);
-  const [loadingAttachments, setLoadingAttachments] = useState(false);
-  const [imageLoadingStates, setImageLoadingStates] = useState<{
-    [eventId: number]: boolean;
-  }>({});
-  
-  const events = useAppSelector(state => state.event.events);
-
+  // Handle form input changes
   const handleInputChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
       const { name, value } = e.target;
@@ -299,687 +76,283 @@ const CreateEvents: React.FC = () => {
     []
   );
 
+  // Handle image upload - single file only
   const handleImageUpload = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
-      const file = e.target.files?.[0];
-      if (file) {
-        const reader = new FileReader();
-        reader.onloadend = () => {
-          setImagePreview(reader.result as string);
-        };
-        reader.readAsDataURL(file);
-        setFormData((prev) => ({ ...prev, image: file }));
-      }
+      const file = e.target.files?.[0] || null;
+      setImageFile(file);
     },
     []
   );
 
-  const formatDate = useCallback((dateString: string) => {
-    const options: Intl.DateTimeFormatOptions = {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-    };
-    return new Date(dateString).toLocaleDateString(undefined, options);
-  }, []);
+  // Validate form data
+const validateForm = useCallback(
+  (isUpdate = false) => {
+    const { title, theme, description, date } = formData;
 
-  const handleCreateEvent = useCallback(async () => {
-    if (!formData.title || !formData.theme || !formData.description || !formData.date) {
-      alert("Please fill all required fields");
-      return;
+    if (!title?.trim()) {
+      toast.error("Title is required");
+      return false;
+    }
+    if (!theme?.trim()) {
+      toast.error("Theme is required");
+      return false;
+    }
+    if (!description?.trim()) {
+      toast.error("Description is required");
+      return false;
+    }
+    if (!date) {
+      toast.error("Date is required");
+      return false;
     }
 
-    setIsSubmitting(true);
-    try {
-      const formDataToSend = new FormData();
-      formDataToSend.append("Title", formData.title || "");
-      formDataToSend.append("Theme", formData.theme || "");
-      formDataToSend.append("Description", formData.description || "");
-      formDataToSend.append("Date", formData.date || "");
-
-      if (formData.image instanceof File) {
-        formDataToSend.append("Image", formData.image);
-      }
-
-      const response = await axiosInstance.post(
-        `${environment.apiUrl}api/Events`,
-        formDataToSend,
-        {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-        }
-      );
-
-      if (response.data) {
-        setIsModalOpen(false);
-        setFormData({
-          title: "",
-          theme: "",
-          description: "",
-          date: "",
-        });
-        setImagePreview("");
-      }
-    } catch (error) {
-      console.error("Failed to create event:", error);
-      alert("Failed to create event. Please try again.");
-    } finally {
-      setIsSubmitting(false);
-    }
-  }, [formData]);
-
-const handleUpdateEvent = useCallback(async (eventId: number) => {
-  if (!formData.title || !formData.theme || !formData.description || !formData.date) {
-    alert("Please fill all required fields");
-    return;
-  }
-
-  setIsSubmitting(true);
-  try {
-    const formDataToSend = new FormData();
-    formDataToSend.append("Title", formData.title);
-    formDataToSend.append("Theme", formData.theme);
-    formDataToSend.append("Description", formData.description);
-    formDataToSend.append("Date", formData.date);
-
-    // Only append image if a new one was selected
-    if (formData.image instanceof File) {
-      formDataToSend.append("Image", formData.image);
+    // For create operation, image is required
+    if (!isUpdate && !imageFile) {
+      toast.error("Image is required");
+      return false;
     }
 
-    // Add debug logging
-    console.log(`Attempting to update event ${eventId} at URL:`, 
-      `${environment.apiUrl}api/Events/${eventId}`);
-
-    const response = await axiosInstance.put(
-      `${environment.apiUrl}api/Events/${eventId}`,
-      formDataToSend,
-      {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      }
-    );
-
-    console.log("Update response:", response);
-
-    // Reset form and close modal
-    setIsModalOpen(false);
-    resetForm();
-    
-    // Show success message
-    alert("Event updated successfully!");
-  } catch (error: any) {
-    console.error("Error updating event:", error);
-    const errorDetails = error.response?.data || error.message;
-    console.error("Error details:", errorDetails);
-    alert(`Failed to update event: ${error.response?.data?.message || error.message}`);
-  } finally {
-    setIsSubmitting(false);
-  }
-}, [formData]);
-
- const handleDeleteEvent = useCallback(
-  async (eventId: number) => {
-    setIsSubmitting(true);
-    try {
-      await axiosInstance.delete(`${environment.apiUrl}api/Events/${eventId}`);
-      alert("Event deleted successfully!");
-    } catch (error: any) {
-      console.error("Error deleting event:", error);
-      alert(`Failed to delete event: ${error.response?.data?.message || error.message}`);
-    } finally {
-      setIsSubmitting(false);
-    }
+    // For update operation, image is optional if imagePath exists
+    // (user can keep the existing image)
+    return true;
   },
-  []
+  [formData, imageFile]
 );
 
-  const handleEditClick = useCallback((event: EventData) => {
-    setFormData({
-      title: event.title,
-      theme: event.theme,
-      description: event.description,
-      date: event.date,
-      imagePath: event.imagePath || event.image,
-    });
-    if (event.imagePath || event.image) {
-      setImagePreview(event.imagePath || event.image);
+  // Create FormData object
+  const createFormData = useCallback(() => {
+    const form = new FormData();
+    form.append("Title", formData.title?.trim() || "");
+    form.append("Theme", formData.theme?.trim() || "");
+    form.append("Description", formData.description?.trim() || "");
+    form.append("Date", formData.date || "");
+
+    // Use "Image" (singular) to match API expectation
+    if (imageFile) {
+      form.append("Image", imageFile);
     }
-    setIsModalOpen(true);
-    setEditingEventId(event.id);
-  }, []);
 
-  const resetForm = useCallback(() => {
-    setFormData({
-      title: "",
-      theme: "",
-      description: "",
-      date: "",
-    });
-    setImagePreview("");
-  }, []);
+    return form;
+  }, [formData, imageFile]);
 
-  const isEditMode = useMemo(() => editingEventId !== null, [editingEventId]);
-
-  const openUpdateModal = useCallback(
-    (event: EventData) => {
-      handleEditClick(event);
-      setEditingEventId(event.id);
-    },
-    [handleEditClick]
-  );
-
-  const openCreateModal = useCallback(() => {
-    resetForm();
-    setEditingEventId(null);
-    setIsModalOpen(true);
-  }, [resetForm]);
-
-  const handleAddMoreImages = useCallback((eventId: number) => {
-    setSelectedEventId(eventId);
-    setAddImagesModalOpen(true);
-  }, []);
-
-  const fetchEventImages = useCallback(
-    async (eventId: number) => {
-      if (imageLoadingStates[eventId] || eventImages[eventId]?.length > 0) {
-        return;
-      }
-
-      try {
-        setImageLoadingStates((prev) => ({ ...prev, [eventId]: true }));
-
-        const res = await axiosInstance.get(
-          `${environment.apiUrl}api/EventsPic/ByEvent/${eventId}`,
-          { timeout: 10000 } 
-        );
-
-        if (res.data?.data && Array.isArray(res.data.data)) {
-          setEventImages((prev) => ({
-            ...prev,
-            [eventId]: res.data.data,
-          }));
-        }
-      } catch (err) {
-        console.warn(`Failed to fetch images for event ${eventId}:`, err);
-      } finally {
-        setImageLoadingStates((prev) => ({ ...prev, [eventId]: false }));
-      }
-    },
-    [eventImages, imageLoadingStates]
-  );
-
-  const handleSubmit = useCallback(() => {
-    if (isSubmitting) return;
-
-    if (editingEventId) {
-      handleUpdateEvent(editingEventId);
-    } else {
-      handleCreateEvent();
-    }
-    setEditingEventId(null);
-  }, [editingEventId, handleUpdateEvent, handleCreateEvent, isSubmitting]);
-
-  const showAttachments = useCallback(async (eventId: number) => {
-    setLoadingAttachments(true);
-    setAttachmentsModalOpen(true);
+  // Create event with smart update
+  const handleCreateEvent = useCallback(async () => {
+    if (!validateForm(false) || isSubmitting) return;
 
     try {
-      const response = await axiosInstance.get(
-        `${environment.apiUrl}api/EventsPic/ByEvent/${eventId}`,
-        { timeout: 15000 }
-      );
-      setAttachmentsImages(response.data?.data || []);
-    } catch (error) {
-      console.error("Failed to fetch attachments:", error);
-      setAttachmentsImages([]);
-    } finally {
-      setLoadingAttachments(false);
-    }
-  }, []);
+      setIsSubmitting(true);
+      setError(null);
 
-  const handleDeleteWithConfirmation = useCallback(
-    (eventId: number, eventTitle: string) => {
-      if (isSubmitting) return;
-
-      const confirmed = window.confirm(
-        `Are you sure you want to delete "${eventTitle}"? This action cannot be undone.`
-      );
-
-      if (confirmed) {
-        handleDeleteEvent(eventId);
-      }
-    },
-    [handleDeleteEvent, isSubmitting]
-  );
-
-  const getImageSource = useCallback(
-    (event: EventData) => {
-      const images = eventImages[event.id];
-      if (images && images.length > 0) {
-        const firstImage = images[0];
-        return firstImage.partyPic || firstImage.imageUrl || "/placeholder.jpg";
-      }
-
-      if (event.imagePath) {
-        return event.imagePath;
-      }
-
-      if (event.image && event.image !== "/placeholder.jpg") {
-        return event.image;
-      }
-
-      return "/placeholder.jpg";
-    },
-    [eventImages]
-  );
-
-  const closeModal = useCallback(() => {
-    setIsModalOpen(false);
-    setEditingEventId(null);
-  }, []);
-
-  useEffect(() => {
-    if (events?.length > 0) {
-      const observer = new IntersectionObserver(
-        (entries) => {
-          entries.forEach((entry) => {
-            if (entry.isIntersecting) {
-              const eventId = parseInt(
-                entry.target.getAttribute("data-event-id") || "0"
-              );
-              if (
-                eventId &&
-                !eventImages[eventId] &&
-                !imageLoadingStates[eventId]
-              ) {
-                fetchEventImages(eventId);
-              }
-            }
-          });
-        },
+      const form = createFormData();
+      const { data } = await axiosInstance.post(
+        `${environment.apiUrl}api/Event`,
+        form,
         {
-          threshold: 0.1,
-          rootMargin: "50px",
+          headers: { "Content-Type": "multipart/form-data" },
+          timeout: 30000, // 30 second timeout
         }
       );
 
-      const tableRows = document.querySelectorAll("[data-event-id]");
-      tableRows.forEach((row) => observer.observe(row));
+      if (data?.data) {
+        // Add timestamp to image path for cache busting
+        const newEvent = {
+          ...data.data,
+          imagePath: data.data.imagePath
+            ? `${data.data.imagePath}?t=${Date.now()}`
+            : data.data.imagePath,
+        };
 
-      return () => observer.disconnect();
+        setEventsData((prev) => [newEvent, ...prev]); // Add to beginning for better UX
+        resetForm();
+        toast.success("Event created successfully!");
+        
+        // Reload the page after successful creation
+        setTimeout(() => {
+          window.location.reload();
+        }, 1500); // Small delay to show the success toast
+      } else {
+        throw new Error("Invalid response from server");
+      }
+    } catch (err: any) {
+      console.error("Create event error:", err);
+      const errorMessage =
+        err.response?.data?.message ||
+        err.response?.data?.errors?.Image?.[0] ||
+        "Error creating event";
+      setError(errorMessage);
+      toast.error(errorMessage);
+    } finally {
+      setIsSubmitting(false);
     }
-  }, [events, fetchEventImages, eventImages, imageLoadingStates]);
+  }, [validateForm, isSubmitting, createFormData, resetForm]);
 
-  useEffect(() => {
-    return () => {
-      Object.values(eventImages)
-        .flat()
-        .forEach((img) => {
-          if (img.imageUrl?.startsWith("blob:")) {
-            URL.revokeObjectURL(img.imageUrl);
+  // Edit event
+  const handleEditClick = useCallback((event: EventData) => {
+    setFormData({ ...event });
+    setImageFile(null);
+    setError(null);
+    setIsModalOpen(true);
+  }, []);
+
+  // Update event with smart update
+  const handleUpdateEvent = useCallback(
+    async (id: number) => {
+      if (!validateForm(true) || isSubmitting) return;
+
+      try {
+        setIsSubmitting(true);
+        setError(null);
+
+        const form = createFormData();
+        const { data } = await axiosInstance.put(
+          `${environment.apiUrl}api/Event/${id}`,
+          form,
+          {
+            headers: { "Content-Type": "multipart/form-data" },
+            timeout: 30000,
           }
+        );
+if (imageFile) {
+  form.append("Image", imageFile);
+}
+        if (data?.data) {
+          // Add timestamp to image path for cache busting
+          const updatedEvent = {
+            ...data.data,
+            imagePath: data.data.imagePath
+              ? `${data.data.imagePath}?t=${Date.now()}`
+              : data.data.imagePath,
+          };
+
+          setEventsData((prev) =>
+            prev.map((event) => (event.id === id ? updatedEvent : event))
+          );
+          resetForm();
+          toast.success("Event updated successfully!");
+          
+          // Reload the page after successful update
+          setTimeout(() => {
+            window.location.reload();
+          }, 1500); // Small delay to show the success toast
+        } else {
+          throw new Error("Invalid response from server");
+        }
+      } catch (err: any) {
+        console.error("Update event error:", err);
+        const errorMessage =
+          err.response?.data?.message ||
+          err.response?.data?.errors?.Image?.[0] ||
+          "Error updating event";
+        setError(errorMessage);
+        toast.error(errorMessage);
+      } finally {
+        setIsSubmitting(false);
+      }
+    },
+    [validateForm, isSubmitting, createFormData, resetForm]
+  );
+
+  // Delete event with confirmation
+  const handleDeleteEvent = useCallback(
+    async (id: number) => {
+      if (isSubmitting) return;
+
+      const confirmDelete = window.confirm(
+        "Are you sure you want to delete this event?"
+      );
+      if (!confirmDelete) return;
+
+      try {
+        setIsSubmitting(true);
+        setError(null);
+
+        await axiosInstance.delete(`${environment.apiUrl}api/Event/${id}`, {
+          timeout: 15000,
         });
-    };
-  }, [eventImages]);
+
+        setEventsData((prev) => prev.filter((event) => event.id !== id));
+        resetForm();
+        toast.success("Event deleted successfully!");
+      } catch (err: any) {
+        console.error("Delete event error:", err);
+        const errorMessage =
+          err.response?.data?.message || "Error deleting event";
+        setError(errorMessage);
+        toast.error(errorMessage);
+      } finally {
+        setIsSubmitting(false);
+      }
+    },
+    [isSubmitting, resetForm]
+  );
+
+  // Format date for display
+  const formatDate = useCallback((dateString: string) => {
+    try {
+      const date = new Date(dateString);
+      if (isNaN(date.getTime())) return dateString; // Return original if invalid
+
+      return `${date.getDate().toString().padStart(2, "0")}-${(
+        date.getMonth() + 1
+      )
+        .toString()
+        .padStart(2, "0")}-${date.getFullYear()}`;
+    } catch {
+      return dateString;
+    }
+  }, []);
+
+  // Handle retry
+  const handleRetry = useCallback(() => {
+    setError(null);
+    fetchEvents();
+  }, [fetchEvents]);
+
+  if (isLoading) {
+    return <Loader />;
+  }
+
+  if (error && eventsData.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[400px] text-red-600">
+        <p className="text-lg mb-4">{error}</p>
+        <Button onClick={handleRetry} className="btn">
+          Retry
+        </Button>
+      </div>
+    );
+  }
 
   return (
     <div className="container mx-auto p-4">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold text-gray-800">Events Management</h1>
-        <Button
-          className="bg-blue-600 hover:bg-blue-700 shadow-md rounded-lg flex items-center gap-2 transition-colors"
-          onClick={openCreateModal}
-          disabled={isSubmitting}
-        >
-          <Plus size={16} />
-          Create Event
-        </Button>
+      <div className="flex justify-between items-center mb-8">
+        <h1 className="text-3xl font-bold text-gray-800">Events</h1>
       </div>
 
-      <div className="overflow-hidden rounded-lg shadow-lg border border-gray-200 bg-white">
-        <Table>
-          <TableCaption className="text-lg font-semibold text-blue-700 py-4">
-            List of Community Events and Celebrations
-          </TableCaption>
-          <TableHeader className="bg-gradient-to-r from-blue-50 to-blue-100">
-            <TableRow>
-              <TableHead className="w-32 text-gray-700 uppercase tracking-wider">
-                Image
-              </TableHead>
-              <TableHead className="text-gray-700 uppercase tracking-wider">
-                Event Title
-              </TableHead>
-              <TableHead className="text-gray-700 uppercase tracking-wider">
-                Theme
-              </TableHead>
-              <TableHead className="text-gray-700 uppercase tracking-wider">
-                Description
-              </TableHead>
-              <TableHead className="text-gray-700 uppercase tracking-wider">
-                Date
-              </TableHead>
-              <TableHead className="text-gray-700 uppercase tracking-wider text-right">
-                Actions
-              </TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {events?.length > 0 ? (
-              events.map((event) => (
-                <TableRow
-                  key={event.id}
-                  data-event-id={event.id}
-                  className="hover:bg-blue-50 transition-colors"
-                >
-                  <TableCell>
-                    <div className="flex justify-center">
-                      <OptimizedImage
-                        src={getImageSource(event)}
-                        alt={event.title}
-                        className="w-16 h-16 object-cover rounded-lg border border-gray-200 shadow-sm"
-                      />
-                    </div>
-                  </TableCell>
-                  <TableCell className="font-medium">
-                    <div className="max-w-xs truncate" title={event.title}>
-                      {event.title}
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <span className="inline-block px-3 py-1 text-xs font-medium  text-blue-800 ">
-                      {event.theme.substring(0,30)}...
-                    </span>
-                  </TableCell>
-                  <TableCell>
-                    <div className="max-w-xs truncate" title={event.description}>
-                      {event.description}
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <span className="text-gray-700">
-                      {formatDate(event.date)}
-                    </span>
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <div className="flex justify-end gap-2">
-                      <Button
-                        onClick={() => openUpdateModal(event)}
-                        variant="outline"
-                        size="sm"
-                        className="text-yellow-600 border-yellow-300 hover:bg-yellow-50"
-                        title="Edit"
-                      >
-                        <Pencil size={16} />
-                      </Button>
-                      <Button
-                        onClick={() =>
-                          handleDeleteWithConfirmation(event.id, event.title)
-                        }
-                        variant="outline"
-                        size="sm"
-                        className="text-red-600 border-red-300 hover:bg-red-50"
-                        title="Delete"
-                      >
-                        <Trash2 size={16} />
-                      </Button>
-                      <Button
-                        onClick={() => handleAddMoreImages(event.id)}
-                        variant="outline"
-                        size="sm"
-                        className="text-green-600 border-green-300 hover:bg-green-50"
-                        title="Add Images"
-                      >
-                        <ImageIcon size={16} />
-                      </Button>
-                      <Button
-                        onClick={() => showAttachments(event.id)}
-                        variant="outline"
-                        size="sm"
-                        className="text-purple-600 border-purple-300 hover:bg-purple-50"
-                        title="View Images"
-                      >
-                        <Eye size={16} />
-                      </Button>
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ))
-            ) : (
-              <TableRow>
-                <TableCell colSpan={6} className="text-center py-12">
-                  <div className="flex flex-col items-center space-y-4">
-                    <ImageIcon size={48} className="text-gray-300" />
-                    <p className="text-lg font-medium text-gray-500">
-                      No events found
-                    </p>
-                    <Button
-                      onClick={openCreateModal}
-                      className="mt-2"
-                      variant="outline"
-                    >
-                      Create Your First Event
-                    </Button>
-                  </div>
-                </TableCell>
-              </TableRow>
-            )}
-          </TableBody>
-        </Table>
-      </div>
-
-      {/* Create/Update Event Modal */}
-    {/* Create/Update Event Modal */}
-<Dialog open={isModalOpen} onOpenChange={closeModal}>
-  <DialogContent className="sm:max-w-[600px] p-4"> {/* Reduced padding here */}
-    <DialogHeader className="px-2"> {/* Reduced padding here */}
-      <DialogTitle>
-        {isEditMode ? "Update Event" : "Create New Event"}
-      </DialogTitle>
-      <DialogDescription>
-        {isEditMode
-          ? "Update the details of this event"
-          : "Fill in the details to create a new event"}
-      </DialogDescription>
-    </DialogHeader>
-    <div className="space-y-3 px-2"> {/* Reduced spacing and padding */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4"> {/* Two-column layout on larger screens */}
-        <div className="space-y-2">
-          <Label htmlFor="title">Title *</Label>
-          <Input
-            id="title"
-            name="title"
-            value={formData.title || ""}
-            onChange={handleInputChange}
-            placeholder="Event title"
-            className="w-full"
-            required
-          />
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="theme">Theme *</Label>
-          <Input
-            id="theme"
-            name="theme"
-            value={formData.theme || ""}
-            onChange={handleInputChange}
-            placeholder="Event theme"
-            className="w-full"
-            required
-          />
-        </div>
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4"> {/* Two-column layout */}
-        <div className="space-y-2">
-          <Label htmlFor="date">Date *</Label>
-          <Input
-            id="date"
-            name="date"
-            type="date"
-            value={formData.date || ""}
-            onChange={handleInputChange}
-            className="w-full"
-            required
-          />
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="image">Image {!isEditMode && "*"}</Label>
-          <Input
-            id="image"
-            type="file"
-            accept="image/*"
-            onChange={handleImageUpload}
-            className="w-full cursor-pointer"
-          />
-        </div>
-      </div>
-
-      <div className="space-y-2">
-        <Label htmlFor="description">Description *</Label>
-        <Textarea
-          id="description"
-          name="description"
-          value={formData.description || ""}
-          onChange={handleInputChange}
-          placeholder="Event description"
-          className="w-full"
-          rows={4}
-          required
-        />
-      </div>
-
-      {imagePreview && (
-        <div className="space-y-2">
-          <Label>Preview:</Label>
-          <div className="mt-1">
-            <OptimizedImage
-              src={imagePreview}
-              alt="Event preview"
-              className="w-32 h-32 object-cover rounded-md border border-gray-200"
-            />
-          </div>
+      {error && (
+        <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-md text-red-700">
+          {error}
         </div>
       )}
-    </div>
-    <DialogFooter className="px-2"> {/* Reduced padding here */}
-      <Button variant="outline" onClick={closeModal}>
-        Cancel
-      </Button>
-      <Button
-        onClick={handleSubmit}
-        disabled={isSubmitting}
-        className="min-w-[120px]"
-      >
-        {isSubmitting ? (
-          <div className="flex items-center gap-2">
-            <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-            {isEditMode ? "Updating..." : "Creating..."}
-          </div>
-        ) : isEditMode ? (
-          "Update Event"
-        ) : (
-          "Create Event"
-        )}
-      </Button>
-    </DialogFooter>
-  </DialogContent>
-</Dialog>
 
-      {/* Add Images Modal */}
-      <AddImagesModal
-        isOpen={addImagesModalOpen}
-        onClose={() => setAddImagesModalOpen(false)}
-        onSave={async (files) => {
-          if (files.length === 0 || !selectedEventId) return;
-
-          setUploading(true);
-          const form = new FormData();
-          files.forEach((file) => form.append("PartyPics", file));
-          form.append("eventId", selectedEventId.toString());
-
-          try {
-            await axiosInstance.post(
-              `${environment.apiUrl}api/EventsPic`,
-              form,
-              {
-                headers: { "Content-Type": "multipart/form-data" },
-                timeout: 30000,
-              }
-            );
-            setAddImagesModalOpen(false);
-            setEventImages((prev) => {
-              const updated = { ...prev };
-              delete updated[selectedEventId];
-              return updated;
-            });
-            await fetchEventImages(selectedEventId);
-          } catch (err: any) {
-            const apiMsg =
-              err?.response?.data?.title ||
-              err?.response?.data?.message ||
-              err?.message ||
-              "Failed to upload images.";
-            alert(apiMsg);
-          } finally {
-            setUploading(false);
-          }
-        }}
-        uploading={uploading}
+      <CreateEventFormAndTable
+        eventsData={eventsData}
+        formData={formData}
+        isModalOpen={isModalOpen}
+        setIsModalOpen={setIsModalOpen}
+        setFormData={setFormData}
+        handleInputChange={handleInputChange}
+        handleImageUpload={handleImageUpload}
+        handleCreateEvent={handleCreateEvent}
+        handleUpdateEvent={handleUpdateEvent}
+        handleDeleteEvent={handleDeleteEvent}
+        formatDate={formatDate}
+        handleEditClick={handleEditClick}
+        imagePreview={getImagePreview()}
+        isSubmitting={isSubmitting}
+        resetForm={resetForm}
       />
-
-      {/* Attachments Modal */}
-      <Dialog
-        open={attachmentsModalOpen}
-        onOpenChange={setAttachmentsModalOpen}
-      >
-        <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>Event Attachments</DialogTitle>
-            <DialogDescription>
-              View all images attached to this event
-            </DialogDescription>
-          </DialogHeader>
-          {loadingAttachments ? (
-            <div className="flex justify-center items-center py-12">
-              <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
-            </div>
-          ) : attachmentsImages.length === 0 ? (
-            <div className="text-center py-12">
-              <ImageIcon size={48} className="mx-auto text-gray-300 mb-4" />
-              <p className="text-gray-500">No attachments found</p>
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-              {attachmentsImages.map((img) => (
-                <div key={img.id} className="relative group">
-                  <OptimizedImage
-                    src={img.partyPic || img.imageUrl}
-                    alt={`Event attachment ${img.id}`}
-                    className="w-full h-48 object-cover rounded-lg border border-gray-200 shadow-sm"
-                  />
-                  <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-all duration-200 rounded-lg flex items-center justify-center opacity-0 group-hover:opacity-100">
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="text-white bg-black bg-opacity-50 hover:bg-opacity-70"
-                      onClick={() =>
-                        window.open(img.partyPic || img.imageUrl, "_blank")
-                      }
-                    >
-                      <Eye size={20} />
-                    </Button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </DialogContent>
-      </Dialog>
     </div>
   );
 };
