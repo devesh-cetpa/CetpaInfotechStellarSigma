@@ -192,7 +192,7 @@ const Login = () => {
       if (String(userData.role).toLowerCase() === "admin") {
         navigate("/monthly-report");
       } else if (String(userData.role).toLowerCase() === "user") {
-        navigate("/report-monthly");
+        navigate("/monthly");
       } else {
         navigate("/login");
       }

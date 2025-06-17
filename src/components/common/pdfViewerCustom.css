@@ -1,4 +1,0 @@
-/* Hides download button */
-.rpv-default-layout__toolbar-button[data-testid="download-button"] {
-  display: none !important;
-}

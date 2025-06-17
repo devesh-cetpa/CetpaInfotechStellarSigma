@@ -1,19 +1,20 @@
 import React from 'react';
 import { Link } from 'react-router';
 import { logo } from '@/assets/image/images';
-import { useDispatch, useSelector } from 'react-redux';
+
 import { removeSessionItem } from '@/lib/helperFunction';
-import { resetUser } from '@/features/user/userSlice';
+
 import { environment } from '@/config';
-import { RootState } from '@/app/store';
+
 import { Button } from './ui/button';
 import { AlignJustify, Power } from 'lucide-react';
-import { SidebarTrigger, useSidebar } from './ui/sidebar';
+import { useSidebar } from './ui/sidebar';
 
 const SiteHeader: React.FC<{ showtoggle?: boolean }> = ({ showtoggle = false }) => {
   // const user = useSelector((state: RootState) => state.user);
   // console.log(user,"user");
-const user = JSON.parse(sessionStorage.getItem("userData") || '{}');
+const user = JSON.parse(sessionStorage.getItem("userData"));
+console.log(user.unique_name,"-------")
   const { toggleSidebar } = useSidebar();
 
   return (
@@ -33,7 +34,7 @@ const user = JSON.parse(sessionStorage.getItem("userData") || '{}');
         </div>
         <div className="flex items-center space-x-4">
           {showtoggle && (
-            <div className="hidden md:block text-gray-800 text-md md:text-lg font-semibold">{user.unique_name}</div>
+            <div className="hidden md:block text-gray-800 text-md md:text-lg font-semibold">{user?.unique_name}</div>
           )}
          <Button
   variant="outline"

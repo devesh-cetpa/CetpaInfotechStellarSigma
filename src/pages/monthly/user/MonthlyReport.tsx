@@ -1,7 +1,5 @@
 import React, { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
-import 'react-pdf/dist/Page/AnnotationLayer.css';
-import 'react-pdf/dist/Page/TextLayer.css';
 import {
   Dialog,
   DialogContent,
@@ -30,8 +28,6 @@ import {
 import { environment } from "@/config";
 import axiosInstance from "@/services/axiosInstance";
 import Loader from "@/components/ui/loader";
-// import { PdfJs } from "@react-pdf-viewer/core";
-import PdfViewer from "@/components/common/PdfViewer";
 
 interface MonthlyReportData {
   id: number;
