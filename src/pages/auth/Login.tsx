@@ -139,15 +139,23 @@ const Login = () => {
       if (response.data && response.data.data && response.data.data.token) {
         const token = response.data.data.token;
         const userData = jwtDecode(token);
+        
+        // Store user data and token in session storage
         sessionStorage.setItem('userData', JSON.stringify(userData));
         sessionStorage.setItem('token', token);
         toast.success('Login Successfully');
 
-        if (String(userData.role).toLowerCase() === 'admin') {
+        // Navigate based on user role
+        const role = String(userData.role).toLowerCase();
+        if (role === 'admin') {
+          // Admin users go to admin dashboard
           navigate('/monthly-report');
-        } else if (String(userData.role).toLowerCase() === 'user') {
+        } else if (role === 'user') {
+          // Regular users go to user dashboard
           navigate('/monthly');
         } else {
+          // Unknown roles stay on login page
+          toast.error('Unknown user role. Please contact administrator.');
           navigate('/login');
         }
       } else {
@@ -185,15 +193,23 @@ const Login = () => {
       
       const token = response.data.data.token;
       const userData = jwtDecode(token);
+      
+      // Store user data and token in session storage
       sessionStorage.setItem("userData", JSON.stringify(userData));
       sessionStorage.setItem("token", token);
       toast.success("Login Successfully");
 
-      if (String(userData.role).toLowerCase() === "admin") {
+      // Navigate based on user role
+      const role = String(userData.role).toLowerCase();
+      if (role === "admin") {
+        // Admin users go to admin dashboard
         navigate("/monthly-report");
-      } else if (String(userData.role).toLowerCase() === "user") {
+      } else if (role === "user") {
+        // Regular users go to user dashboard
         navigate("/monthly");
       } else {
+        // Unknown roles stay on login page
+        toast.error("Unknown user role. Please contact administrator.");
         navigate("/login");
       }
     } catch (error: any) {

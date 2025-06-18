@@ -6,7 +6,28 @@ const Unauthorized: React.FC = () => {
   const navigate = useNavigate()
 
   const handleGoBack = () => {
-    navigate('/dashboard')
+    // Check if user is logged in and redirect based on role
+    const userDataRaw = sessionStorage.getItem('userData');
+    if (userDataRaw) {
+      try {
+        const userData = JSON.parse(userDataRaw);
+        const role = userData?.role?.toLowerCase();
+        
+        if (role === 'admin') {
+          navigate('/monthly-report');
+        } else if (role === 'user') {
+          navigate('/monthly');
+        } else {
+          navigate('/');
+        }
+      } catch (error) {
+        console.error('Error parsing user data:', error);
+        navigate('/');
+      }
+    } else {
+      // If not logged in, go to home page
+      navigate('/');
+    }
   }
 
   return (
